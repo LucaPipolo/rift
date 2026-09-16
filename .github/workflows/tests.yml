@@ -1,0 +1,87 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: write
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: xdebug
+          ini-values: phar.readonly=0
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      # --ci runs the whole suite: TIA is for local runs only.
+      - name: Run tests with coverage
+        run: vendor/bin/pest --ci --coverage --min=100 --coverage-clover clover.xml --coverage-html coverage-html
+        env:
+          XDEBUG_MODE: coverage
+
+      # Uploaded even when coverage drops below 100%, to show what is missing.
+      - name: Upload HTML coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-html
+          path: coverage-html
+          if-no-files-found: ignore
+
+      - name: Download base coverage
+        if: github.event_name == 'pull_request'
+        id: baseline
+        uses: dawidd6/action-download-artifact@v21
+        continue-on-error: true
+        with:
+          workflow: tests.yml
+          branch: ${{ github.base_ref }}
+          event: push
+          name: coverage-report
+          path: coverage-base
+
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: clover.xml
+          if-no-files-found: error
+
+      - name: Upload baseline coverage
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: clover.xml
+          if-no-files-found: error
+
+      - name: Coverage report
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.actor != 'dependabot[bot]'
+        uses: lucassabreu/comment-coverage-clover@v0.17.1
+        with:
+          file: clover.xml
+          base-file: ${{ steps.baseline.outcome == 'success' && 'coverage-base/clover.xml' || '' }}
+          show-percentage-change-on-table: true
+          with-branches: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,94 @@
+name: release
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          ini-values: phar.readonly=0
+
+      # Builds rift.phar and appends it to a pinned, checksum-verified static PHP
+      # runtime per platform. `make build` runs the same script locally.
+      - name: Build the binaries
+        env:
+          VERSION: ${{ github.event.release.tag_name }}
+        run: bash docker/build.sh darwin-arm64 darwin-x86_64 linux-arm64 linux-x86_64
+
+      - name: Collect the release assets
+        run: |
+          mkdir -p dist
+          cp builds/rift-darwin-arm64 builds/rift-darwin-x86_64 builds/rift-linux-arm64 builds/rift-linux-x86_64 builds/rift.phar dist/
+          cd dist && shasum -a 256 -- * | tee checksums.txt
+
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" dist/* --clobber
+
+      # This repository is its own Homebrew tap, so publishing means committing
+      # the new version and checksums to Formula/rift.rb on main. main only
+      # takes signed commits through pull requests, so the commit is made by the
+      # release GitHub App, which the ruleset lets through. Commits an app makes
+      # through the API are signed by GitHub, and start no other workflows.
+      - name: Create a token for the release app
+        if: '!github.event.release.prerelease'
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+
+      - name: Publish to Homebrew
+        if: '!github.event.release.prerelease'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          FORMULA: Formula/rift.rb
+        run: |
+          version="${RELEASE_TAG#v}"
+          endpoint="repos/${GITHUB_REPOSITORY}/contents/${FORMULA}"
+
+          # Start from the formula on main, which may be newer than the tag's.
+          gh api "${endpoint}?ref=main" > current.json
+          jq -r .content current.json | base64 --decode > rift.rb
+          cp rift.rb rift.rb.before
+
+          sed -i -E "s/^  version \"[^\"]*\"/  version \"${version}\"/" rift.rb
+
+          for target in darwin-arm64 darwin-x86_64 linux-arm64 linux-x86_64; do
+            sum="$(shasum -a 256 "dist/rift-${target}" | cut -d' ' -f1)"
+            sed -i -E "/rift-${target}\"/{n;s/sha256 \"[^\"]*\"/sha256 \"${sum}\"/}" rift.rb
+          done
+
+          # A rerun finds the formula already up to date.
+          if cmp -s rift.rb rift.rb.before; then
+            echo "${FORMULA} is already at ${RELEASE_TAG}."
+            exit 0
+          fi
+
+          diff rift.rb.before rift.rb || true
+
+          # No author or committer is passed, or GitHub would not sign it.
+          gh api --method PUT "${endpoint}" \
+            -f branch=main \
+            -f message="build: publish ${RELEASE_TAG} to Homebrew" \
+            -f sha="$(jq -r .sha current.json)" \
+            -f content="$(base64 -w0 rift.rb)" \
+            --jq '"Committed \(.commit.sha) to main"'

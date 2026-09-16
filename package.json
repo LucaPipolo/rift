@@ -1,0 +1,18 @@
+{
+    "name": "rift",
+    "description": "Run every Git worktree of a Docker Compose or Laravel Sail project side by side, each with its own containers, ports, and local HTTPS domain. Built for parallel AI agents.",
+    "author": {
+        "name": "Luca Pipolo",
+        "email": "dev@lucapipolo.com",
+        "url": "https://www.lucapipolo.com"
+    },
+    "type": "module",
+    "scripts": {
+        "prepare": "husky"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^21.2.4",
+        "@commitlint/config-conventional": "^21.2.4",
+        "husky": "^9.1.7"
+    }
+}

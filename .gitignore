@@ -1,0 +1,127 @@
+# ==========================================
+# Base Rules
+# ==========================================
+
+# Build Output
+dist/
+builds/
+
+# Dependencies
+/node_modules
+/vendor
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.ci
+!.env.example
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ==========================================
+# PHP Tooling Caches
+# ==========================================
+
+# Pint & PHP CS Fixer
+.php-cs-fixer.cache
+
+# Rector
+rector-cache
+
+# PHPUnit & Pest
+.phpunit.cache
+.phpunit.result.cache
+/tests/Browser/Screenshots
+/.pest
+
+# Coverage Reports
+/.coverage
+
+# ==========================================
+# Hosting & Serverless Platform Directories
+# ==========================================
+
+# Vercel
+.vercel/
+
+# Netlify
+.netlify/
+
+# Cloudflare Wrangler
+.wrangler/
+
+# ==========================================
+# IDEs, Editors & Local Settings
+# ==========================================
+
+# Visual Studio Code & Cursor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.history/
+*.code-workspace
+
+# JetBrains
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Vim / Neovim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-v][a-z]
+[._]sw[a-p]
+*~
+tags
+.netrwhist
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ==========================================
+# AI Assistant Artifacts
+# ==========================================
+
+# Cursor AI
+.cursor/
+.cursorupdates/
+
+# GitHub Copilot
+.copilot/
+.continue/
+.aide/
+
+# Local Python/AI Models
+./.ipynb_checkpoints/
+./.venv/
+./venv/
+./env/
+
+# ==========================================
+# System Files & OS Clutter
+# ==========================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+desktop.ini
+$RECYCLE.BIN/

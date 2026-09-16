@@ -1,0 +1,71 @@
+{
+    "name": "lucapipolo/rift",
+    "description": "Run every Git worktree of a Docker Compose or Laravel Sail project side by side, each with its own containers, ports, and local HTTPS domain. Built for parallel AI agents.",
+    "keywords": [
+        "cli",
+        "git",
+        "git-worktree",
+        "worktree",
+        "docker",
+        "docker-compose",
+        "laravel-sail",
+        "caddy",
+        "https",
+        "local-development",
+        "dev-environment",
+        "ai-agents",
+        "laravel-zero"
+    ],
+    "type": "project",
+    "license": "MIT",
+    "homepage": "https://github.com/LucaPipolo/rift",
+    "support": {
+        "issues": "https://github.com/LucaPipolo/rift/issues",
+        "source": "https://github.com/LucaPipolo/rift"
+    },
+    "authors": [
+        {
+            "name": "Luca Pipolo",
+            "email": "dev@lucapipolo.com",
+            "homepage": "https://www.lucapipolo.com"
+        }
+    ],
+    "require": {
+        "php": "^8.5",
+        "illuminate/http": "^13.32",
+        "laravel-zero/foundation": "^13.25",
+        "laravel-zero/framework": "^13.0",
+        "symfony/yaml": "^8.1.6"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.14",
+        "laravel/pint": "^1.32.1",
+        "mockery/mockery": "^1.6.15",
+        "pestphp/pest": "^5.2.0",
+        "pestphp/pest-plugin-phpstan": "^5.3",
+        "pestphp/pest-plugin-type-coverage": "^5.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "bin": [
+        "rift"
+    ]
+}

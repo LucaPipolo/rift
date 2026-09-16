@@ -1,0 +1,32 @@
+# Development tooling for rift itself. Run it through the Makefile: `make help`.
+services:
+  php:
+    build: docker
+    image: rift-dev
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: /app
+    volumes:
+      - .:/app
+      - composer-cache:/tmp/composer/cache
+      - micro-cache:/tmp/.cache/rift-micro
+    environment:
+      HOME: /tmp
+
+  bun:
+    build:
+      context: docker
+      dockerfile: bun.Dockerfile
+    image: rift-bun
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: /app
+    volumes:
+      - .:/app
+      - bun-cache:/tmp/.bun-cache
+    environment:
+      HOME: /tmp
+      BUN_INSTALL_CACHE_DIR: /tmp/.bun-cache
+
+volumes:
+  composer-cache:
+  micro-cache:
+  bun-cache:

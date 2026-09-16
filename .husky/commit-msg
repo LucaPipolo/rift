@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+# Validates the commit message with commitlint, inside the bun container.
+
+if ! docker info > /dev/null 2>&1; then
+    echo "commit-msg: Docker is not running, so the commit message cannot be checked." >&2
+    echo "commit-msg: start Docker and commit again." >&2
+    exit 1
+fi
+
+docker compose --progress quiet run --rm -T --user "$(id -u):$(id -g)" bun \
+    bunx --bun commitlint < "$1"
