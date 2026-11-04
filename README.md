@@ -46,10 +46,11 @@ reviews:
 
 ## Install
 
-With [Homebrew], add Rift's tap, then install it:
+With [Homebrew], add and trust Rift's tap, then install it:
 
 ```bash
 brew tap lucapipolo/rift https://github.com/LucaPipolo/rift
+brew trust lucapipolo/rift
 brew install rift
 ```
 
