@@ -1,6 +1,7 @@
 # Homebrew formula for Rift. This repository is its own tap:
 #
 #   brew tap lucapipolo/rift https://github.com/LucaPipolo/rift
+#   brew trust lucapipolo/rift
 #   brew install rift
 #
 # The release workflow sets the version and the four checksums on every stable
