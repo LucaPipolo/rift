@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Config\ProjectRegistry;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Process;
@@ -55,6 +56,12 @@ describe('when the checkout is set up and the machine is healthy', function (): 
         'own domain' => 'https://myapp.test',
         'alias' => 'https://api.myapp.test',
     ]);
+
+    it('remembers the project for rift dash', function (): void {
+        artisan('up')->run();
+
+        expect((new ProjectRegistry((string) getcwd() . '/.config/rift/projects.yaml'))->roots())->toBe([(string) getcwd()]);
+    });
 
     it('does not point to the log file', function (): void {
         artisan('up')->doesntExpectOutputToContain('Log:');
@@ -406,6 +413,12 @@ describe('when the containers fail to start', function (): void {
 
         Http::assertNotSent(fn (Request $request): bool => str_ends_with($request->url(), '/routes'));
     });
+
+    it('does not remember the project', function (): void {
+        artisan('up')->run();
+
+        expect((string) getcwd() . '/.config/rift/projects.yaml')->not->toBeFile();
+    });
 });
 
 describe('when the app container is not on the router network', function (): void {
@@ -487,5 +500,23 @@ describe('when an after_up hook fails', function (): void {
 
     it('does not print the URLs', function (): void {
         artisan('up')->doesntExpectOutputToContain('https://myapp.test');
+    });
+});
+
+describe('when the project registry cannot be read', function (): void {
+    beforeEach(function (): void {
+        lifecycleCaddy();
+        $root = lifecycleProject();
+        mkdir($root . '/.config/rift', 0o777, true);
+        file_put_contents($root . '/.config/rift/projects.yaml', "projects: nope\n");
+        host($root);
+    });
+
+    it('still exits with success', function (): void {
+        artisan('up')->assertExitCode(0);
+    });
+
+    it('says what is wrong with the registry', function (): void {
+        artisan('up')->expectsOutputToContain('`projects` must be a list of directories.');
     });
 });

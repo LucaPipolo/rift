@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Config\ProjectRegistry;
 use App\Config\RouterConfig;
 use App\Contracts\Network;
 use App\Contracts\PortProbe;
@@ -22,6 +23,12 @@ describe('register()', function (): void {
         scratchConfigHome();
 
         expect(app(RouterConfig::class))->toBe(app(RouterConfig::class));
+    });
+
+    it('keeps the project registry beside the global config', function (): void {
+        $home = scratchConfigHome();
+
+        expect(app(ProjectRegistry::class)->path)->toBe($home . '/rift/projects.yaml');
     });
 
     it('probes ports through the system', function (): void {

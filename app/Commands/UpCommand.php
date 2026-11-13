@@ -6,8 +6,10 @@ namespace App\Commands;
 
 use App\Checkout\Instance;
 use App\Commands\Concerns\ManagesRouter;
+use App\Config\ProjectRegistry;
 use App\Enums\HookStage;
 use App\Env\EnvProjector;
+use App\Exceptions\ConfigException;
 use App\Support\Outcome;
 use App\Support\Ui;
 
@@ -36,10 +38,11 @@ final class UpCommand extends RiftCommand
      * Execute the console command.
      *
      * @param  EnvProjector  $projector  The env projector.
+     * @param  ProjectRegistry  $registry  The projects rift has started.
      *
      * @return int The exit code.
      */
-    public function handle(EnvProjector $projector): int
+    public function handle(EnvProjector $projector, ProjectRegistry $registry): int
     {
         if (! $this->requireDocker()) {
             return self::FAILURE;
@@ -106,6 +109,8 @@ final class UpCommand extends RiftCommand
             return self::FAILURE;
         }
 
+        $this->remember($registry, $instance);
+
         if (! in_array($instance->container(), $router->docker->networkMembers($router->config->network()), true)) {
             $this->reportUnwiredCompose($instance, $router->config->network());
 
@@ -130,6 +135,23 @@ final class UpCommand extends RiftCommand
         Ui::blank();
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Record the project for `rift dash`, which must never stop a checkout from coming up.
+     *
+     * @param  ProjectRegistry  $registry  The projects rift has started.
+     * @param  Instance  $instance  The current checkout.
+     *
+     * @return void
+     */
+    private function remember(ProjectRegistry $registry, Instance $instance): void
+    {
+        try {
+            $registry->remember($instance->checkout->mainRoot);
+        } catch (ConfigException $e) {
+            $this->notice([Ui::e($e->getMessage()), '', 'Fix or delete it so `rift dash` can list this project.'], 'projects');
+        }
     }
 
     /**

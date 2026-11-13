@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Config\ProjectRegistry;
 use App\Config\RouterConfig;
 use App\Contracts\Network;
 use App\Contracts\PortProbe;
@@ -26,6 +27,9 @@ final class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(RouterConfig::class, fn () => RouterConfig::load());
+
+        // Bound per resolution, so it follows XDG_CONFIG_HOME like the router config's path does.
+        $this->app->bind(ProjectRegistry::class, fn () => new ProjectRegistry(ProjectRegistry::path()));
 
         $this->app->bind(PortProbe::class, SystemPortProbe::class);
 
