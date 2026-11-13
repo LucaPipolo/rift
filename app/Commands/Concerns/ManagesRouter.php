@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Commands\Concerns;
 
 use App\Config\PortBinding;
+use App\Exceptions\AddressNotAssignedException;
 use App\Exceptions\PortConflictException;
 use App\Router\PortHolder;
 use App\Router\Router;
@@ -30,20 +31,32 @@ trait ManagesRouter
         ));
 
         $conflict = null;
+        $unassigned = null;
 
-        $started = $this->step('Starting router', function () use ($router, &$conflict) {
+        $started = $this->step('Starting router', function () use ($router, &$conflict, &$unassigned) {
             try {
                 return Outcome::changed($router->ensureRunning(), skipped: 'already running');
             } catch (PortConflictException $e) {
                 $conflict = $e;
 
                 return Outcome::failed("ports {$router->config->binding->http}/{$router->config->binding->https} in use");
+            } catch (AddressNotAssignedException $e) {
+                $unassigned = $e;
+
+                return Outcome::failed("{$e->address} not assigned");
             }
         });
 
         if ($started->fatal) {
             if ($conflict !== null) {
                 $this->reportPortConflict($conflict->holder, $router->config->binding);
+            }
+
+            if ($unassigned !== null) {
+                $this->notice([
+                    "<span class=\"font-bold\">{$unassigned->address}</span> is not assigned to this machine,",
+                    "so the router cannot listen on it. {$unassigned->fix}",
+                ]);
             }
 
             return false;

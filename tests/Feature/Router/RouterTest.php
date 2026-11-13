@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Config\PortBinding;
 use App\Config\RouterConfig;
+use App\Exceptions\AddressNotAssignedException;
 use App\Exceptions\PortConflictException;
 use App\Exceptions\RouterException;
 use App\Router\CaddyAdmin;
@@ -259,6 +260,21 @@ describe('ensureRunning()', function (): void {
 
         expect(fn () => routerUsingAdmin(caddy([]), new RouterConfig(binding: new PortBinding(https: 8443)))->ensureRunning())
             ->toThrow(RouterException::class, 'Could not start the router.');
+
+        Process::assertNotRan(fn (PendingProcess $process): bool => ($process->command[1] ?? null) === 'run');
+    });
+
+    it('throws an AddressNotAssignedException when the bind address is missing', function (): void {
+        Process::fake(['*' => '']);
+
+        routerUsingAdmin(caddy([]), new RouterConfig(binding: new PortBinding('127.0.0.3')))->ensureRunning();
+    })->throws(AddressNotAssignedException::class, '127.0.0.3 is not assigned to this machine. Assign 127.0.0.3.');
+
+    it('does not start the router when the bind address is missing', function (): void {
+        Process::fake(['*' => '']);
+
+        expect(fn () => routerUsingAdmin(caddy([]), new RouterConfig(binding: new PortBinding('127.0.0.3')))->ensureRunning())
+            ->toThrow(AddressNotAssignedException::class);
 
         Process::assertNotRan(fn (PendingProcess $process): bool => ($process->command[1] ?? null) === 'run');
     });
