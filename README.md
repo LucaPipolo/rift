@@ -2,8 +2,8 @@
 
 [![Tests][badge-tests]][workflow-tests]
 [![Static analysis][badge-sniff]][workflow-sniff]
-[![Type coverage][badge-types]][workflow-types]
 [![Lint][badge-lint]][workflow-lint]
+[![Build][badge-build]][workflow-build]
 [![Homebrew][badge-homebrew]][releases]
 [![Buy me a coffee][badge-coffee]][coffee]
 
@@ -16,7 +16,10 @@ manages configurable host ports, and serves your apps through one shared HTTPS
 router.
 
 Let multiple AI agents work on different features or versions of your project in
-parallel, with a running app for each one that you can open and review.
+parallel, with a running app for each one that you can open and review, and
+watch them all from one dashboard.
+
+![rift dash showing every copy of two projects][demo]
 
 ## Why use Rift?
 
@@ -43,6 +46,8 @@ reviews:
   [Laravel Sail] setup.
 - Use HTTPS locally. One [Caddy] router serves all your projects and
   [worktrees].
+- See every copy at once. `rift dash` shows which apps are serving, what each
+  agent has changed and how recently, and starts, stops or opens any of them.
 
 ## Install
 
@@ -168,6 +173,8 @@ The app in your new [worktree][worktrees] is now available at
 
 For an existing branch, use `git worktree add ../myapp-search search` instead.
 
+Run `rift dash` from either directory to watch both copies in one view.
+
 ## Everyday usage
 
 Run these commands from the project or [worktree][worktrees] you want to manage:
@@ -177,6 +184,7 @@ rift up        # Start this copy of the app
 rift down      # Stop this copy; leave the others running
 rift status    # See the apps registered with the router
 rift doctor    # Diagnose setup problems
+rift dash      # Watch and manage every app copy in one view
 ```
 
 Use `rift setup` for a new [worktree][worktrees], or after changing settings
@@ -186,6 +194,41 @@ one.
 Rift updates its managed `.env` values while preserving unrelated keys,
 comments, and ordering. A new [worktree][worktrees] inherits the main copy's
 `.env` when available, otherwise it starts from `.env.example`.
+
+### Watch every copy at once
+
+`rift dash` opens a live view of every project Rift has started on this
+machine, with each of its [worktrees]. For each copy it shows whether it is
+serving, its branch, how far it is ahead of or behind the main branch, its
+uncommitted files and when a file last changed, so you can tell which agents
+are still working. Its tabs show the copy's containers, logs, `.env` values,
+hooks and recent commits. Run it from any directory; it opens on the copy you
+run it in.
+
+Select a copy with the arrow keys, then act on it:
+
+| Key       | Action                                                     |
+| --------- | ---------------------------------------------------------- |
+| `u` / `d` | Start it, or stop it after asking                          |
+| `r` / `s` | Restart it, or write its `.env` and start it               |
+| `space`   | Mark it, so the actions above apply to every marked copy   |
+| `o` / `y` | Open its URL in the browser, or copy it                    |
+| `e`       | Open a shell in its app container                          |
+| `n` / `x` | Create a worktree from a branch, or remove one after asking |
+| `[` / `]` | Switch tabs                                                |
+| `/`       | Filter the copies by name or branch                        |
+| `3`       | Show the router: its routes, a `rift doctor` report and its settings |
+| `:` / `?` | Find any command by name, or show every key                |
+| `q`       | Quit                                                       |
+
+Actions run in the background, and their output appears in the command log at
+the bottom. Until the router's certificate authority is trusted, `u` and `s`
+run in the foreground instead, so you can type your password.
+
+Rift lists a project once `rift up` has started it, in
+`~/.config/rift/projects.yaml`. Remove a line from that file to hide a project.
+Outside a terminal, such as in a script, `rift dash` prints `rift status`
+instead.
 
 ## Integrate with an agent development environment
 
@@ -457,16 +500,17 @@ MIT
 [dnsmasq]: https://thekelleys.org.uk/dnsmasq/doc.html
 [Orca]: https://onorca.dev/
 [Orca scripts]: https://onorca.dev/docs/model/worktrees
+[demo]: .github/dash.gif
 
 [badge-tests]: https://img.shields.io/github/actions/workflow/status/LucaPipolo/rift/tests.yml?branch=main&label=tests&style=flat-square&logo=githubactions&logoColor=white
 [badge-sniff]: https://img.shields.io/github/actions/workflow/status/LucaPipolo/rift/sniff.yml?branch=main&label=static%20analysis&style=flat-square&logo=githubactions&logoColor=white
-[badge-types]: https://img.shields.io/github/actions/workflow/status/LucaPipolo/rift/types.yml?branch=main&label=type%20coverage&style=flat-square&logo=githubactions&logoColor=white
 [badge-lint]: https://img.shields.io/github/actions/workflow/status/LucaPipolo/rift/lint.yml?branch=main&label=lint&style=flat-square&logo=githubactions&logoColor=white
+[badge-build]: https://img.shields.io/github/actions/workflow/status/LucaPipolo/rift/build.yml?branch=main&label=build&style=flat-square&logo=githubactions&logoColor=white
 [badge-homebrew]: https://img.shields.io/github/v/release/LucaPipolo/rift?sort=semver&label=homebrew&style=flat-square&logo=homebrew&logoColor=white
 [badge-coffee]: https://img.shields.io/badge/buy%20me%20a%20coffee-FFDD00?style=flat-square&logo=buymeacoffee&logoColor=black
 [workflow-tests]: https://github.com/LucaPipolo/rift/actions/workflows/tests.yml
 [workflow-sniff]: https://github.com/LucaPipolo/rift/actions/workflows/sniff.yml
-[workflow-types]: https://github.com/LucaPipolo/rift/actions/workflows/types.yml
 [workflow-lint]: https://github.com/LucaPipolo/rift/actions/workflows/lint.yml
+[workflow-build]: https://github.com/LucaPipolo/rift/actions/workflows/build.yml
 [releases]: https://github.com/LucaPipolo/rift/releases/latest
 [coffee]: https://buymeacoffee.com/lucapipolo
