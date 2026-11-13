@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Config\RouterConfig;
+use App\Contracts\Network;
 use App\Contracts\PortProbe;
 use App\Docker\Docker;
 use App\Router\CaddyAdmin;
@@ -59,7 +60,7 @@ function routerServing(array $routes, array $domains = ['myapp.test']): void
 function routerWithScratchTrustStore(): string
 {
     $directory = scratch();
-    $config = new RouterConfig();
+    $config = app(RouterConfig::class);
     $docker = new Docker();
 
     app()->instance(Router::class, new Router(
@@ -127,10 +128,11 @@ function bufferedOutputOf(string $command, array $parameters = []): string
  * The admin API is left unfaked, so call routerServing() or caddy() after this.
  *
  * @param  array<string, string|ProcessResult>  $overrides  Process results keyed by command pattern, matched first.
+ * @param  string|null  $routerConfig  The global config.yaml contents, or null for none.
  *
  * @return string The checkout root.
  */
-function doctorPassingMachine(array $overrides = []): string
+function doctorPassingMachine(array $overrides = [], ?string $routerConfig = null): string
 {
     $root = project(['.env' => implode("\n", [
         'COMPOSE_PROJECT_NAME=myapp',
@@ -141,6 +143,15 @@ function doctorPassingMachine(array $overrides = []): string
         'APP_SERVICE=app',
         'CONTAINER_PORT=80',
     ]) . "\n"]);
+
+    // Written before the router is bound, which reads it.
+    if ($routerConfig !== null) {
+        mkdir($root . '/.config/rift', 0o777, true);
+        file_put_contents($root . '/.config/rift/config.yaml', $routerConfig);
+    }
+
+    // The domain resolves as a working dnsmasq would.
+    app()->instance(Network::class, fakeNetwork(['myapp.test' => ['127.0.0.1']], ['127.0.0.1']));
 
     routerWithTrustedCa();
 
