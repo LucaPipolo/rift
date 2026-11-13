@@ -10,9 +10,14 @@ use App\Contracts\PortProbe;
 use App\Router\CaddyAdmin;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Process;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// A process with no matching fake throws instead of running on the real machine.
+// Laravel only checks while it records, so record from the start with no fakes.
+uses(TestCase::class)
+    ->beforeEach(fn () => Process::fake([])->preventStrayProcesses())
+    ->in('Feature');
 
 // Only re-run tests affected by local changes. CI always runs the full suite.
 // The graph lives in the project because the container discards its home.

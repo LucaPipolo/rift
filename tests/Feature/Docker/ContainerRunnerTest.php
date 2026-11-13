@@ -182,7 +182,10 @@ describe('runHook()', function (): void {
         expect((new ContainerRunner())->runHook(new Hook('php artisan migrate'), myapp()))->toBeFalse();
     });
 
+    // Fakes never call the output callback, so this runs a real, harmless printf.
     it('streams the hook output to the output callback', function (): void {
+        Process::preventStrayProcesses(false);
+
         $chunks = [];
         $runner = new ContainerRunner(function (string $chunk) use (&$chunks): void {
             $chunks[] = $chunk;
