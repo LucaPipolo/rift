@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Contracts\Network;
 use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\Process;
 
@@ -361,6 +362,108 @@ describe('when a competing router cannot be removed', function (): void {
         artisan('doctor')
             ->expectsConfirmation('Remove them?', 'yes')
             ->expectsOutputToContain('could not remove old-router');
+    });
+});
+
+describe('when the project domain does not resolve', function (): void {
+    beforeEach(function (): void {
+        doctorPassingMachine();
+        app()->instance(Network::class, fakeNetwork());
+    });
+
+    it('says the domain does not resolve and how to fix it', function (): void {
+        artisan('doctor')->expectsOutputToContain(
+            'It does not resolve to an IPv4 address. Point myapp.test and its subdomains at 127.0.0.1',
+        );
+    });
+
+    it('exits with failure', function (): void {
+        artisan('doctor')->assertExitCode(1);
+    });
+});
+
+describe('when the project domain resolves elsewhere', function (): void {
+    beforeEach(function (): void {
+        doctorPassingMachine();
+        app()->instance(Network::class, fakeNetwork(['myapp.test' => ['10.0.0.8', '10.0.0.9']], ['127.0.0.1']));
+    });
+
+    it('names every address the domain resolves to', function (): void {
+        artisan('doctor')->expectsOutputToContain('It resolves to 10.0.0.8, 10.0.0.9, which this machine does not hold.');
+    });
+
+    it('exits with failure', function (): void {
+        artisan('doctor')->assertExitCode(1);
+    });
+});
+
+describe('when the project domain resolves to an address this machine holds', function (): void {
+    beforeEach(function (): void {
+        doctorPassingMachine();
+        routerServing([statusRoute('myapp', ['myapp.test'], 'myapp-app-1:80')]);
+    });
+
+    it('passes the DNS check, as the router listens on every address', function (string ...$addresses): void {
+        app()->instance(Network::class, fakeNetwork(['myapp.test' => array_values($addresses)], ['127.0.0.1', '127.0.0.53', '192.168.1.5']));
+
+        artisan('doctor')->expectsOutputToContain('myapp.test resolves to this machine')->assertExitCode(0);
+    })->with([
+        'another loopback address' => ['127.0.0.53'],
+        'a network address' => ['192.168.1.5'],
+        'one of several addresses' => ['10.0.0.8', '127.0.0.1'],
+    ]);
+});
+
+describe('when the project domain resolves to a loopback address this machine does not hold', function (): void {
+    beforeEach(function (): void {
+        doctorPassingMachine();
+        routerServing([statusRoute('myapp', ['myapp.test'], 'myapp-app-1:80')]);
+        // As on macOS after a reboot drops the alias dnsmasq still answers with.
+        app()->instance(Network::class, fakeNetwork(['myapp.test' => ['127.0.0.2']], ['127.0.0.1']));
+    });
+
+    it('says the address is not held and how to fix it', function (): void {
+        artisan('doctor')->expectsOutputToContain(
+            'It resolves to 127.0.0.2, which this machine does not hold. Point myapp.test and its subdomains at 127.0.0.1',
+        );
+    });
+
+    it('exits with failure', function (): void {
+        artisan('doctor')->assertExitCode(1);
+    });
+});
+
+describe('when the router binds an address of its own', function (): void {
+    beforeEach(function (): void {
+        // The running router was started with the bind address.
+        doctorPassingMachine(['*Config.Labels*' => "127.0.0.2:80:443\n"], routerConfig: "router:\n  bind: 127.0.0.2\n");
+        routerServing([statusRoute('myapp', ['myapp.test'], 'myapp-app-1:80')]);
+    });
+
+    it('passes when the domain resolves to the bind address and the address is assigned', function (string ...$addresses): void {
+        app()->instance(Network::class, fakeNetwork(['myapp.test' => array_values($addresses)], ['127.0.0.2']));
+
+        artisan('doctor')->assertExitCode(0);
+    })->with([
+        'only the bind address' => ['127.0.0.2'],
+        'the bind address among others' => ['127.0.0.1', '127.0.0.2'],
+    ]);
+
+    it('fails the DNS check when the domain resolves to the default loopback address', function (): void {
+        app()->instance(Network::class, fakeNetwork(['myapp.test' => ['127.0.0.1']], ['127.0.0.2']));
+
+        artisan('doctor')
+            ->expectsOutputToContain('It resolves to 127.0.0.1. Point myapp.test and its subdomains at 127.0.0.2')
+            ->assertExitCode(1);
+    });
+
+    it('shows how to assign a missing bind address', function (): void {
+        app()->instance(Network::class, fakeNetwork(['myapp.test' => ['127.0.0.2']]));
+
+        artisan('doctor')
+            ->expectsOutputToContain('127.0.0.2 is assigned to this machine')
+            ->expectsOutputToContain('Assign 127.0.0.2.')
+            ->assertExitCode(1);
     });
 });
 

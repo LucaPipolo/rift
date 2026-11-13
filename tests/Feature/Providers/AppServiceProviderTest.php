@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Config\RouterConfig;
+use App\Contracts\Network;
 use App\Contracts\PortProbe;
+use App\Env\SystemNetwork;
 use App\Env\SystemPortProbe;
 use App\Router\Router;
 
@@ -24,6 +26,10 @@ describe('register()', function (): void {
 
     it('probes ports through the system', function (): void {
         expect(app(PortProbe::class)::class)->toBe(SystemPortProbe::class);
+    });
+
+    it('asks the system about the network', function (): void {
+        expect(app(Network::class)::class)->toBe(SystemNetwork::class);
     });
 
     it('builds the router from the shared router config', function (): void {

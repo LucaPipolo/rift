@@ -6,6 +6,7 @@ use App\Checkout\Checkout;
 use App\Checkout\Instance;
 use App\Config\ProjectConfig;
 use App\Config\RouterConfig;
+use App\Contracts\Network;
 use App\Contracts\PortProbe;
 use App\Router\CaddyAdmin;
 use Illuminate\Http\Client\Request;
@@ -100,6 +101,64 @@ function probe(array $listening = [], array $published = []): PortProbe
         public function publishedBy(string $composeProject): array
         {
             return $this->published;
+        }
+    };
+}
+
+/**
+ * Create a network with fixed name resolution and addresses.
+ *
+ * @param  array<string, list<string>>  $hosts  The IPv4 addresses each hostname resolves to.
+ * @param  list<string>  $assigned  The addresses assigned to this machine.
+ *
+ * @return Network The fake network.
+ */
+function fakeNetwork(array $hosts = [], array $assigned = []): Network
+{
+    return new class($hosts, $assigned) implements Network
+    {
+        /**
+         * Create a new fake network instance.
+         *
+         * @param  array<string, list<string>>  $hosts  The addresses each hostname resolves to.
+         * @param  list<string>  $assigned  The assigned addresses.
+         */
+        public function __construct(private array $hosts, private array $assigned) {}
+
+        /**
+         * Get the fixed addresses of a hostname.
+         *
+         * @param  string  $host  The hostname.
+         *
+         * @return list<string> The addresses, empty when the hostname is not listed.
+         */
+        public function addresses(string $host): array
+        {
+            return $this->hosts[$host] ?? [];
+        }
+
+        /**
+         * Determine whether an address is in the assigned list.
+         *
+         * @param  string  $address  The address.
+         *
+         * @return bool Whether it is listed.
+         */
+        public function hasAddress(string $address): bool
+        {
+            return in_array($address, $this->assigned, true);
+        }
+
+        /**
+         * Get fixed advice naming the address.
+         *
+         * @param  string  $address  The address.
+         *
+         * @return string The advice.
+         */
+        public function howToAssign(string $address): string
+        {
+            return "Assign {$address}.";
         }
     };
 }

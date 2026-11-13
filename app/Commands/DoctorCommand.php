@@ -7,6 +7,7 @@ namespace App\Commands;
 use App\Checkout\CheckoutLocator;
 use App\Checkout\Instance;
 use App\Config\ProjectConfig;
+use App\Contracts\Network;
 use App\Env\EnvProjector;
 use App\Exceptions\ConfigException;
 use App\Router\Router;
@@ -41,10 +42,11 @@ final class DoctorCommand extends RiftCommand
      * @param  Router  $router  The shared router.
      * @param  CheckoutLocator  $locator  The checkout locator.
      * @param  EnvProjector  $projector  The env projector.
+     * @param  Network  $network  This machine's name resolution and addresses.
      *
      * @return int The exit code.
      */
-    public function handle(Router $router, CheckoutLocator $locator, EnvProjector $projector): int
+    public function handle(Router $router, CheckoutLocator $locator, EnvProjector $projector, Network $network): int
     {
         Ui::rule('doctor', $router->config->name);
 
@@ -63,9 +65,10 @@ final class DoctorCommand extends RiftCommand
         }
 
         Ui::heading('project');
-        $this->checkProject($locator, $projector);
+        $this->checkProject($locator, $projector, $network);
 
         Ui::heading('router');
+        $this->checkBindAddress($router, $network);
         $this->checkRouter($router);
         $this->checkOrphans($router);
 
@@ -77,10 +80,11 @@ final class DoctorCommand extends RiftCommand
      *
      * @param  CheckoutLocator  $locator  The checkout locator.
      * @param  EnvProjector  $projector  The env projector.
+     * @param  Network  $network  This machine's name resolution and addresses.
      *
      * @return void
      */
-    private function checkProject(CheckoutLocator $locator, EnvProjector $projector): void
+    private function checkProject(CheckoutLocator $locator, EnvProjector $projector, Network $network): void
     {
         try {
             $checkout = $locator->locate();
@@ -117,6 +121,7 @@ final class DoctorCommand extends RiftCommand
         );
 
         $this->checkComposeWiring($instance);
+        $this->checkDns($instance, $network);
 
         $this->skip(sprintf(
             '%s serves %s',
@@ -149,6 +154,64 @@ final class DoctorCommand extends RiftCommand
             'Add `networks: [default, router]` to ' . $instance->config->appService
             . ' and an external `router` network named "${ROUTER_NAME}" to your compose file.',
         );
+    }
+
+    /**
+     * Check that the checkout's domain resolves to an address the router listens on.
+     *
+     * A resolver that stopped answering leaves every other check green while
+     * the browser cannot find the app.
+     *
+     * @param  Instance  $instance  The current checkout.
+     * @param  Network  $network  This machine's name resolution.
+     *
+     * @return void
+     */
+    private function checkDns(Instance $instance, Network $network): void
+    {
+        $domain = $instance->domain();
+        $bind = $instance->router->binding->address;
+        $addresses = $network->addresses($domain);
+
+        // A router on every address answers on any address this machine holds,
+        // but a loopback alias macOS lost on reboot answers nothing.
+        $reachesRouter = $bind === null
+            ? array_filter($addresses, $network->hasAddress(...)) !== []
+            : in_array($bind, $addresses, true);
+
+        $listed = implode(', ', $addresses);
+
+        $reason = match (true) {
+            $addresses === [] => 'It does not resolve to an IPv4 address.',
+            $bind === null => "It resolves to {$listed}, which this machine does not hold.",
+            default => "It resolves to {$listed}.",
+        };
+
+        $this->check(
+            "{$domain} resolves to " . ($bind ?? 'this machine'),
+            $reachesRouter,
+            "{$reason} Point {$instance->config->baseDomain} and its subdomains at "
+            . ($bind ?? '127.0.0.1') . ', for example with dnsmasq.',
+        );
+    }
+
+    /**
+     * Check that the router's bind address is assigned to this machine.
+     *
+     * @param  Router  $router  The shared router.
+     * @param  Network  $network  This machine's addresses.
+     *
+     * @return void
+     */
+    private function checkBindAddress(Router $router, Network $network): void
+    {
+        $bind = $router->config->binding->address;
+
+        if ($bind === null) {
+            return;
+        }
+
+        $this->check("{$bind} is assigned to this machine", $network->hasAddress($bind), $network->howToAssign($bind));
     }
 
     /**
