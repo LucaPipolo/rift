@@ -8,6 +8,8 @@
 #
 # Writes builds/rift.phar and builds/rift-<target>. The build runs in a copy of
 # the working tree with production dependencies only, so vendor/ is untouched.
+# Each target needs builds/rift-dash-<target> from docker/build-dash.sh first,
+# which its binary carries; rift.phar, for any platform, carries none.
 set -euo pipefail
 
 PHP_VERSION="8.5.8"
@@ -86,9 +88,18 @@ mkdir -p "$root/builds"
 cp "$work/builds/rift.phar" "$root/builds/rift.phar"
 
 for target in "$@"; do
+    # Each binary carries the rift-dash built for its own platform, which `rift dash` unpacks on first use.
+    dash="$root/builds/rift-dash-$target"
+    [[ -f "$dash" ]] || { echo "No ${dash}. Build it first with docker/build-dash.sh ${target}." >&2; exit 1; }
+
+    cp "$root/builds/rift.phar" "$work/rift-$target.phar"
+    php -d phar.readonly=0 -r '(new Phar($argv[1]))->addFile($argv[2], "dash/rift-dash");' "$work/rift-$target.phar" "$dash"
+
     # Assigned first so a failed download stops the build instead of writing an empty binary.
     micro="$(runtime "$target")"
-    cat "$micro" "$root/builds/rift.phar" > "$root/builds/rift-$target"
+    # A new file, not one overwritten in place: macOS kills a binary rewritten where it last ran.
+    rm -f "$root/builds/rift-$target"
+    cat "$micro" "$work/rift-$target.phar" > "$root/builds/rift-$target"
     chmod +x "$root/builds/rift-$target"
     echo "Built builds/rift-$target"
 done

@@ -44,7 +44,12 @@ final class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(Input::class, fn () => new Input(STDIN));
 
-        $this->app->bind(Companion::class, fn (Application $app) => new Companion($app->make(Rift::class), (string) getenv('PATH')));
+        $this->app->bind(Companion::class, fn (Application $app) => new Companion(
+            $app->make(Rift::class),
+            (string) getenv('PATH'),
+            base_path('dash/rift-dash'),
+            Companion::cacheDirectory(),
+        ));
 
         $this->app->bind(Rift::class, function (): Rift {
             $argv = $_SERVER['argv'] ?? [];

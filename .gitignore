@@ -41,6 +41,7 @@ rector-cache
 # Coverage Reports
 /.coverage
 /dash/coverage.out
+/dash/rift-dash
 /dash/coverage.html
 
 # ==========================================

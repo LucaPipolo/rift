@@ -7,6 +7,7 @@ namespace App\Commands;
 use App\Contracts\Terminal;
 use App\Dashboard\Companion;
 use App\Dashboard\Rift;
+use App\Exceptions\ConfigException;
 use App\Support\Ui;
 use Illuminate\Support\Facades\Process;
 use Symfony\Component\Process\Process as SymfonyProcess;
@@ -51,7 +52,11 @@ final class DashCommand extends RiftCommand
             return self::FAILURE;
         }
 
-        $dashboard = $companion->find();
+        try {
+            $dashboard = $companion->find();
+        } catch (ConfigException $e) {
+            return $this->bail($e->getMessage());
+        }
 
         if ($dashboard === null) {
             return $this->bail(

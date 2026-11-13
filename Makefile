@@ -79,8 +79,9 @@ rift: ## Run rift from source in the container, e.g. make rift ARGS="list"
 	$(RUN) php rift $(ARGS)
 
 build: ## Build native rift and rift-dash binaries for this machine into builds/
-	$(RUN) bash docker/build.sh $(TARGET)
 	$(GO) sh /app/docker/build-dash.sh $(TARGET)
+	$(RUN) bash docker/build.sh $(TARGET)
+	rm -f builds/rift builds/rift-dash
 	cp builds/rift-$(TARGET) builds/rift
 	cp builds/rift-dash-$(TARGET) builds/rift-dash
 

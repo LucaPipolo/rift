@@ -52,8 +52,8 @@ describe('register()', function (): void {
         expect(app(Input::class))->toEqual(new Input(STDIN));
     });
 
-    it('looks for rift-dash beside rift, then on the PATH', function (): void {
-        expect(app(Companion::class))->toEqual(new Companion(app(Rift::class), (string) getenv('PATH')));
+    it('unpacks the rift-dash the binary carries, or looks beside rift, then on the PATH', function (): void {
+        expect(app(Companion::class))->toEqual(new Companion(app(Rift::class), (string) getenv('PATH'), base_path('dash/rift-dash'), Companion::cacheDirectory()));
     });
 
     it('runs rift again through this PHP binary', function (): void {

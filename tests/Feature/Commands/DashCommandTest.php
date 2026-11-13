@@ -77,6 +77,30 @@ describe('when rift-dash is not installed', function (): void {
     });
 });
 
+describe('when rift-dash cannot be unpacked', function (): void {
+    beforeEach(function (): void {
+        $embedded = scratch() . '/rift-dash';
+        file_put_contents($embedded, "#!/bin/sh\n");
+        $this->cache = scratch() . '/cache';
+        mkdir($this->cache, 0o555);
+        app()->instance(Terminal::class, fakeTerminal());
+        app()->instance(Companion::class, new Companion(new Rift('micro', '/nowhere/rift'), '', $embedded, $this->cache));
+        host(lifecycleProject());
+    });
+
+    afterEach(function (): void {
+        chmod($this->cache, 0o755);
+    });
+
+    it('exits with failure', function (): void {
+        artisan('dash')->assertExitCode(1);
+    });
+
+    it('says where it could not write', function (): void {
+        artisan('dash')->expectsOutputToContain('Could not unpack rift-dash to');
+    });
+});
+
 describe('when the output is not a terminal', function (): void {
     beforeEach(function (): void {
         app()->instance(Terminal::class, fakeTerminal(interactive: false));
