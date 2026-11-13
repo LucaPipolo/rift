@@ -64,9 +64,11 @@ Before starting a project, you need:
   [OrbStack], and [Colima] are supported ways to run [Docker].
 - A project using [Docker Compose] or [Laravel Sail], with an `.env` or
   `.env.example` file.
-- Local DNS for `*.test`, pointing to `127.0.0.1`. You can configure this
-  with a tool such as [dnsmasq]; Rift does not configure DNS for you.
-- Ports 80, 443, and 2019 available for Rift's shared router.
+- Local DNS for `*.test`, pointing to `127.0.0.1`, or to the `router.bind`
+  address when you set one. You can configure this with a tool such as
+  [dnsmasq]; Rift does not configure DNS for you.
+- Ports 80, 443, and 2019 available for Rift's shared router. To share 80 and
+  443 with Valet, Herd or Lerd, see Configuration and advanced usage.
 
 <details>
 <summary>Install from a release binary</summary>
@@ -346,12 +348,62 @@ router:
   name: rift-router
   image: caddy:latest
   admin: http://localhost:2019
+  bind: 127.0.0.2   # Default: every address
+  http: 80
+  https: 443
 ```
+
+After changing `bind`, `http` or `https`, run `rift router:restart`. Rift
+recreates the router container with the new ports and keeps its certificates.
+`rift doctor` flags a running router that still uses the old ones.
+The admin API always stays on `127.0.0.1:2019`.
 
 A project can request a separate router with `router: myapp-router` in its
 `rift.yaml`. That router still needs the same host ports, so it cannot run
 alongside the shared router on the same machine. `rift down` stops a private
 router when its last route is removed.
+
+</details>
+
+<details>
+<summary>Run alongside Valet, Herd or Lerd</summary>
+
+Valet, Herd and Lerd also need ports 80 and 443. Instead of stopping one to use
+the other, give Rift's router other ports or an address of its own.
+
+**Other ports.** No extra setup, but URLs carry the port, such as
+`https://myapp.test:8443`:
+
+```yaml
+router:
+  http: 8080
+  https: 8443
+```
+
+Use `{url}` rather than `https://{domain}` in your `rift.yaml` `env` section, so
+`APP_URL` includes the port. `rift init` writes `{url}`.
+
+**An address of its own.** URLs stay clean, but Rift's projects need a domain
+of their own, such as `myapp.rift`, that resolves to that address:
+
+```yaml
+router:
+  bind: 127.0.0.2
+```
+
+On macOS, add the loopback address, and point the `rift` domain at it with
+[dnsmasq]:
+
+```bash
+sudo ifconfig lo0 alias 127.0.0.2   # Lost on reboot unless a LaunchDaemon re-adds it
+echo 'address=/rift/127.0.0.2' >> "$(brew --prefix)/etc/dnsmasq.d/rift.conf"
+sudo sh -c 'echo "nameserver 127.0.0.1" > /etc/resolver/rift'
+sudo brew services restart dnsmasq
+```
+
+Sharing ports 80 and 443 this way has been checked on macOS with [OrbStack].
+On Linux, `127.0.0.0/8` needs no alias, but a server listening on every
+address may still block the router.
 
 </details>
 
@@ -367,12 +419,13 @@ For detailed command output, add `-v`, for example `rift up -v`. Without it,
 subprocess output goes to a log whose path is printed when a step fails.
 
 - The browser cannot find your domain: check that your local DNS resolves
-  `*.test` to `127.0.0.1`.
+  `*.test` to `127.0.0.1`, or to your `router.bind` address.
 - `rift status` shows `(down)`: the app container is not running.
 - `rift status` shows `(unreachable)`: the container is running but has not
   joined the router network. Check the [Docker Compose] configuration in step 2.
 - Ports are already in use: stop the conflicting service before starting
-  Rift's router.
+  Rift's router, or move the router to other ports or an address of its own,
+  as Configuration and advanced usage describes.
 
 Still stuck? [Open an issue](https://github.com/LucaPipolo/rift/issues).
 
