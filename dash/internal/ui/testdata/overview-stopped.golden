@@ -1,0 +1,40 @@
+ rift   ● rift-router :80 :443   ✓ CA trusted   │   3 serving  1 unreachable  1 failed  1 stopped                                           
+╭─ [1] Projects ───────────────────────────────────╮╭─  Overview │ Containers │ Logs │ Env │ Hooks │ Git  ─────────── fix-login.myapp.test ╮
+│ ● myapp           myapp.test                 3/5 ││ Stopped. Press u to start it, or s to write its .env first.                          │
+│ ● shop            shop.test                  1/1 ││                                                                                      │
+│ ! broken          cannot read rift.yaml      0/0 ││ urls                                                                                 │
+╰──────────────────────────────────────────────────╯│ – https://fix-login.myapp.test                                                       │
+╭─ [2] Checkouts · myapp ──────────────────────────╮│ – https://api.fix-login.myapp.test                                                   │
+│ ● main          main                             ││                                                                                      │
+│ ● search        feat/search       ↑3 ↓1 ✎2    8s ││ checkout                                                                             │
+│ ◐ pdf-export    feat/pdf-export                  ││ state             ○ stopped                                                          │
+│ ✗ orders        refactor/orders                  ││ branch            (detached) level with main                                         │
+│ ○ fix-login     (detached)                    2h ││ path              /Sites/myapp-fix-login                                             │
+│                                                  ││ compose project   myapp-fix-login                                                    │
+│                                                  ││ app               app:80 · preset compose                                            │
+│                                                  ││ uncommitted       nothing · last change 2h ago                                       │
+│                                                  ││                                                                                      │
+│                                                  ││ host ports                                                                           │
+│                                                  ││ VITE_PORT         not set: press s                                                   │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+╰──────────────────────────────────────────────────╯│                                                                                      │
+╭─ [3] Router ─────────────────────────────────────╮│                                                                                      │
+│ ● running · caddy:latest                         ││                                                                                      │
+│ 3 routes · 2 on its network                      ││                                                                                      │
+╰──────────────────────────────────────────────────╯╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Command log ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Actions you run show their output here.                                                                                                  │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+ u up  d down  r restart  o open  e shell  n new  x remove  space mark  / filter  [ ] tab  : commands  ? help  q quit                       

@@ -1,0 +1,40 @@
+ rift   ● rift-router :80 :443   ✓ CA trusted   │   3 serving  1 unreachable  1 failed  1 stopped                                           
+╭─ [1] Projects ───────────────────────────────────╮╭─ Keys ───────────────────────────────────────────────────────────────────────────────╮
+│ ● myapp           myapp.test                 3/5 ││ moving around                             project                                    │
+│ ● shop            shop.test                  1/1 ││ 1 2 3     focus a panel                   n         new worktree from a branch       │
+│ ! broken          cannot read rift.yaml      0/0 ││ tab       next panel                      U D       start all stopped, stop all      │
+╰──────────────────────────────────────────────────╯│ j k ↑ ↓   move the selection                                                         │
+╭─ [2] Checkouts · myapp ──────────────────────────╮│ g G       first, last                     router                                     │
+│ ● main          main                             ││ [ ] h l   previous, next tab              3         routes, doctor, settings         │
+│ ● search        feat/search       ↑3 ↓1 ✎2    8s ││ ctrl+d u  scroll the view down, up        H         run rift doctor                  │
+│ ◐ pdf-export    feat/pdf-export                  ││ /         filter the checkouts            R T       restart it, trust its CA         │
+│ ✗ orders        refactor/orders                  ││                                                                                      │
+│ ○ fix-login     (detached)                    2h ││ selected or marked checkouts              anywhere                                   │
+│                                                  ││ u         up                              :         find a command by name           │
+│                                                  ││ d         down, after asking              ?         close this help                  │
+│                                                  ││ r         restart                         q         quit                             │
+│                                                  ││ s         setup: write .env, then up                                                 │
+│                                                  ││ space     mark for a batch action                                                    │
+│                                                  ││ esc       clear the marks and the filter                                             │
+│                                                  ││                                                                                      │
+│                                                  ││ selected checkout                                                                    │
+│                                                  ││ o y       open its URL, copy it                                                      │
+│                                                  ││ e E       shell in its app, open $EDITOR                                             │
+│                                                  ││ x         remove the worktree                                                        │
+│                                                  ││ f         pause or follow its logs                                                   │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+╰──────────────────────────────────────────────────╯│                                                                                      │
+╭─ [3] Router ─────────────────────────────────────╮│                                                                                      │
+│ ● running · caddy:latest                         ││                                                                                      │
+│ 3 routes · 2 on its network                      ││                                                                                      │
+╰──────────────────────────────────────────────────╯╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Command log ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Actions you run show their output here.                                                                                                  │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+ esc close                                                                                                                                  

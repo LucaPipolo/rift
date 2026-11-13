@@ -1,0 +1,40 @@
+ rift   ● rift-router :80 :443   ✓ CA trusted   │   3 serving  1 unreachable  1 failed  1 stopped                                           
+╭─ [1] Projects ───────────────────────────────────╮╭─  Routes │ Doctor │ Config  ──────────────────────────────────────────── rift-router ╮
+│ ● myapp           myapp.test                 3/5 ││ ● myapp.test                               → myapp-app-1:80                          │
+│ ● shop            shop.test                  1/1 ││ ● api.myapp.test                           → myapp-app-1:80                          │
+│ ! broken          cannot read rift.yaml      0/0 ││ ◐ pdf-export.myapp.test                    → myapp-pdf-export-app-1:80  (unreachabl… │
+╰──────────────────────────────────────────────────╯│ ● shop.test                                → shop-laravel.test-1:80                  │
+╭─ [2] Checkouts · myapp ──────────────────────────╮│                                                                                      │
+│ ● main          main                             ││                                                                                      │
+│ ● search        feat/search       ↑3 ↓1 ✎2    8s ││                                                                                      │
+│ ◐ pdf-export    feat/pdf-export                  ││                                                                                      │
+│ ✗ orders        refactor/orders                  ││                                                                                      │
+│ ○ fix-login     (detached)                    2h ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+╰──────────────────────────────────────────────────╯│                                                                                      │
+╭─ [3] Router ─────────────────────────────────────╮│                                                                                      │
+│ ● running · caddy:latest                         ││                                                                                      │
+│ 3 routes · 2 on its network                      ││                                                                                      │
+╰──────────────────────────────────────────────────╯╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Command log ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Actions you run show their output here.                                                                                                  │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+ [ ] tab  H doctor  R restart router  T trust CA  : commands  ? help  q quit                                                                

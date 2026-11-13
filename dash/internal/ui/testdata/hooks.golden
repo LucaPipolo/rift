@@ -1,0 +1,40 @@
+ rift   ● rift-router :80 :443   ✓ CA trusted   │   3 serving  1 unreachable  1 failed  1 stopped                                           
+╭─ [1] Projects ───────────────────────────────────╮╭─  Overview │ Containers │ Logs │ Env │ Hooks │ Git  ────────────────────── shop.test ╮
+│ ● myapp           myapp.test                 3/5 ││ before_up                                                                            │
+│ ● shop            shop.test                  1/1 ││ $ Installing PHP dependencies · docker run --rm -u "$(id -u):$(id -g)" -v            │
+│ ! broken          cannot read rift.yaml      0/0 ││ "$PWD:/var/www/html" -w /var/www/html composer:latest composer install --ignore-     │
+╰──────────────────────────────────────────────────╯│ platform-reqs --no-scripts · on the host · unless vendor/bin/sail exists             │
+╭─ [2] Checkouts · shop ───────────────────────────╮│                                                                                      │
+│ ● main          main                             ││ after_up                                                                             │
+│                                                  ││ $ Migrating · php artisan migrate                                                    │
+│                                                  ││                                                                                      │
+│                                                  ││ before_down                                                                          │
+│                                                  ││ $ npm run stop · on the host                                                         │
+│                                                  ││                                                                                      │
+│                                                  ││ after_down                                                                           │
+│                                                  ││   none                                                                               │
+│                                                  ││                                                                                      │
+│                                                  ││ Hooks come from rift.yaml and run inside laravel.test unless they run on the host.   │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+╰──────────────────────────────────────────────────╯│                                                                                      │
+╭─ [3] Router ─────────────────────────────────────╮│                                                                                      │
+│ ● running · caddy:latest                         ││                                                                                      │
+│ 3 routes · 2 on its network                      ││                                                                                      │
+╰──────────────────────────────────────────────────╯╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Command log ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Actions you run show their output here.                                                                                                  │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+ u up  d down  r restart  o open  e shell  n new  x remove  space mark  / filter  [ ] tab  : commands  ? help  q quit                       
