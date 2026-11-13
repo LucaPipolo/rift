@@ -15,4 +15,5 @@ CHANGELOG.md export-ignore
 /CLAUDE.md export-ignore
 /.claude export-ignore
 /.mcp.json export-ignore
+/stubs export-ignore
 /dash export-ignore

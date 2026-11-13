@@ -6,6 +6,7 @@ use App\Checkout\Checkout;
 use App\Checkout\Instance;
 use App\Config\ProjectConfig;
 use App\Config\RouterConfig;
+use App\Contracts\Terminal;
 use App\Dashboard\CheckoutStatus;
 use App\Dashboard\GitStatus;
 use App\Dashboard\ProjectStatus;
@@ -147,6 +148,36 @@ function dashboardCheckout(
     ];
 
     return new CheckoutStatus($instance, $branch, $state, $containers, $git ?? new GitStatus(), $env);
+}
+
+/**
+ * Create a terminal that is, or is not, one a person is at.
+ *
+ * @param  bool  $interactive  Whether it is interactive.
+ *
+ * @return Terminal The fake terminal.
+ */
+function fakeTerminal(bool $interactive = true): Terminal
+{
+    return new class($interactive) implements Terminal
+    {
+        /**
+         * Create a new fake terminal instance.
+         *
+         * @param  bool  $interactive  Whether it is interactive.
+         */
+        public function __construct(private bool $interactive) {}
+
+        /**
+         * Determine whether the fake is interactive.
+         *
+         * @return bool Whether it is interactive.
+         */
+        public function interactive(): bool
+        {
+            return $this->interactive;
+        }
+    };
 }
 
 /**

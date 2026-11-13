@@ -1,0 +1,8 @@
+<?php
+
+/**
+ * Get the path of the running native binary. Only the static micro runtime defines it.
+ *
+ * @return string The absolute path.
+ */
+function micro_get_self_filename(): string {}

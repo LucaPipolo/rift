@@ -6,7 +6,11 @@ use App\Config\ProjectRegistry;
 use App\Config\RouterConfig;
 use App\Contracts\Network;
 use App\Contracts\PortProbe;
+use App\Contracts\Terminal;
+use App\Dashboard\Companion;
 use App\Dashboard\Input;
+use App\Dashboard\Rift;
+use App\Dashboard\SystemTerminal;
 use App\Env\SystemNetwork;
 use App\Env\SystemPortProbe;
 use App\Router\Router;
@@ -40,8 +44,38 @@ describe('register()', function (): void {
         expect(app(Network::class)::class)->toBe(SystemNetwork::class);
     });
 
+    it('draws on the system terminal', function (): void {
+        expect(app(Terminal::class)::class)->toBe(SystemTerminal::class);
+    });
+
     it('reads rift-dash\'s requests from standard input', function (): void {
         expect(app(Input::class))->toEqual(new Input(STDIN));
+    });
+
+    it('looks for rift-dash beside rift, then on the PATH', function (): void {
+        expect(app(Companion::class))->toEqual(new Companion(app(Rift::class), (string) getenv('PATH')));
+    });
+
+    it('runs rift again through this PHP binary', function (): void {
+        expect(app(Rift::class)->interactive('up')[0])->toBe(PHP_BINARY);
+    });
+
+    it('runs rift again from an absolute script path', function (): void {
+        $script = app(Rift::class)->interactive('up')[1];
+
+        expect($script)->toStartWith('/')->toBe(realpath($script));
+    });
+
+    it('runs rift again as `rift` when PHP was not started with a script', function (): void {
+        $argv = $_SERVER['argv'];
+        $_SERVER['argv'] = [];
+        chdir(scratch());
+
+        try {
+            expect(app(Rift::class)->interactive('up')[1])->toBe('rift');
+        } finally {
+            $_SERVER['argv'] = $argv;
+        }
     });
 
     it('builds the router from the shared router config', function (): void {

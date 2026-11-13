@@ -11,3 +11,7 @@ parameters:
         - tests/
 
     level: max
+
+    # Functions only the static micro runtime of the native binary defines.
+    scanFiles:
+        - stubs/micro.stub
