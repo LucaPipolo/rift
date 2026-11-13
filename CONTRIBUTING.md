@@ -207,8 +207,10 @@ workflow checks every commit in a pull request as well.
 
 ## Pull requests
 
-1. Branch off `main`.
-2. Make your change, with tests for the behaviour you add or change.
+1. Branch off `main`, naming the branch after the type of its main change, such
+   as `feat/trust-command` or `fix/detect-host-port-holders`.
+2. Make your change in commits that each pass the checks below on their own,
+   with tests for the behaviour you add or change.
 3. Update `README.md` when a command, option or `rift.yaml` key changes.
 4. Run the same checks as CI:
 
@@ -219,16 +221,32 @@ workflow checks every commit in a pull request as well.
    make test:coverage
    ```
 
-5. Push the branch and open a pull request, for example with the [GitHub CLI]
-   from the branch:
+5. Push the branch and open a pull request, for example with the [GitHub CLI]:
 
    ```bash
-   gh pr create --fill
+   gh pr create --title "feat: add trust command" --body-file pr.md
    ```
 
-Give the pull request a Conventional Commit title too: when a pull request is
-squash-merged, its title becomes the commit message. Every pull request runs
-these workflows:
+Give the pull request a Conventional Commit title too, summarizing the whole
+branch: when a pull request is squash-merged, its title becomes the commit
+message. The description has exactly two sections:
+
+```markdown
+## Context
+
+- Adds a `<domain> resolves to <address>` check to `doctor`'s project section.
+
+## Verification Plan
+
+1. Run `make build`, then `builds/rift doctor` in a project whose domain does
+   not resolve, and confirm the check fails with the fix underneath.
+```
+
+Context lists what changed, one bullet per piece. The Verification Plan lists
+the steps a reviewer takes to see it working, with the exact commands and the
+output to expect. CI already runs the checks, so they are not steps.
+
+Every pull request runs these workflows:
 
 | Workflow   | What it checks                                                                 |
 |------------|--------------------------------------------------------------------------------|
@@ -241,6 +259,44 @@ these workflows:
 The Tests workflow comments on the pull request with how coverage changed from
 the base branch, and uploads the HTML report as the `coverage-html` artifact.
 Pull requests from forks and Dependabot get the artifact but no comment.
+
+## AI tooling
+
+Rift is developed with AI agents, often several in parallel, each in its own
+worktree. Their instructions for [Claude Code] live in `CLAUDE.md` and
+`.claude/`: guidelines for the architecture, Git and docs, rules for PHP,
+comments, tests and docs that load for the files they cover, and skills.
+
+### Recording AI-assisted work
+
+Commits made with AI assistance end with a trailer naming the tool and the
+model:
+
+```text
+Co-Authored-By: Claude Code <noreply@anthropic.com>
+Model: Opus (claude-opus-5-5)
+```
+
+### Agent skills
+
+| Skill                  | What it does                                                                        |
+|------------------------|-------------------------------------------------------------------------------------|
+| `git-commit`           | Writes and checks the message for staged changes, used by agents.                   |
+| `/open-pr`             | Opens a pull request with the title and description described above.                |
+| `/address-pr-comments` | Works through open review feedback on a pull request, from [Codex] or any reviewer. |
+| `/update-dependencies` | Updates Composer and Bun dependencies, one commit per package.                      |
+
+The slash commands are only run by hand: their skills set
+`disable-model-invocation: true`, so an agent never starts one on its own.
+
+### MCP servers
+
+`.mcp.json` configures the [Model Context Protocol][MCP] servers for this
+project, so every worktree gets the same ones:
+
+| Server       | What it is for                                                        |
+|--------------|-----------------------------------------------------------------------|
+| [Context7]   | Current documentation for Laravel Zero, Pest, Larastan and the rest.  |
 
 ## Releasing
 
@@ -353,8 +409,11 @@ not open a public issue. For anything else, [open an issue][issues] with:
 - your operating system, and how you run Docker.
 
 [Bun]: https://bun.sh/
+[Claude Code]: https://claude.com/product/claude-code
+[Codex]: https://openai.com/codex/
 [commitlint]: https://commitlint.js.org/
 [Composer]: https://getcomposer.org/
+[Context7]: https://context7.com/
 [Conventional Commits]: https://www.conventionalcommits.org/
 [Docker]: https://www.docker.com/
 [GitHub CLI]: https://cli.github.com/
@@ -364,6 +423,7 @@ not open a public issue. For anything else, [open an issue][issues] with:
 [issues]: https://github.com/LucaPipolo/rift/issues
 [Larastan]: https://github.com/larastan/larastan
 [Laravel Zero]: https://laravel-zero.com/
+[MCP]: https://modelcontextprotocol.io/
 [new app]: https://github.com/settings/apps/new
 [PCOV]: https://github.com/krakjoe/pcov
 [Pest]: https://pestphp.com/
