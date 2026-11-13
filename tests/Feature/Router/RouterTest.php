@@ -6,6 +6,7 @@ use App\Config\RouterConfig;
 use App\Exceptions\PortConflictException;
 use App\Exceptions\RouterException;
 use App\Router\CaddyAdmin;
+use App\Router\PortHolder;
 use App\Router\Router;
 use Illuminate\Http\Client\Request;
 use Illuminate\Process\PendingProcess;
@@ -47,11 +48,29 @@ describe('blocker()', function (): void {
     it('returns the other container that holds the web ports', function (): void {
         Process::fake(['*Ports*' => "nginx\t0.0.0.0:80->80/tcp\n", '*' => '']);
 
-        expect(routerUsingAdmin(caddy([]))->blocker())->toBe('nginx');
+        expect(routerUsingAdmin(caddy([]))->blocker())->toEqual(new PortHolder('nginx'));
+    });
+
+    it('returns a host process listening on a web port', function (string $port): void {
+        Process::fake(["*lsof*-iTCP:{$port}*" => "p123\ncnginx\n", '*' => '']);
+
+        expect(routerUsingAdmin(caddy([]))->blocker())->toEqual(new PortHolder('nginx', onHost: true));
+    })->with(['80', '443']);
+
+    it('prefers the container over a host process', function (): void {
+        Process::fake(['*Ports*' => "traefik\t0.0.0.0:443->443/tcp\n", '*lsof*' => "p123\ncnginx\n", '*' => '']);
+
+        expect(routerUsingAdmin(caddy([]))->blocker())->toEqual(new PortHolder('traefik'));
+    });
+
+    it('ignores host listeners when the router itself holds the web ports', function (): void {
+        Process::fake(['*Ports*' => "rift-router\t0.0.0.0:80->80/tcp\n", '*lsof*' => "p123\ncnginx\n", '*' => '']);
+
+        expect(routerUsingAdmin(caddy([]))->blocker())->toBeNull();
     });
 
     it('returns null when the router is running', function (): void {
-        Process::fake(['*Ports*' => "nginx\t0.0.0.0:80->80/tcp\n", '*docker*ps*' => "rift-router\n"]);
+        Process::fake(['*Ports*' => "nginx\t0.0.0.0:80->80/tcp\n", '*docker*ps*' => "rift-router\n", '*lsof*' => "p123\ncnginx\n"]);
 
         expect(routerUsingAdmin(caddy([]))->blocker())->toBeNull();
     });
@@ -117,6 +136,20 @@ describe('ensureRunning()', function (): void {
 
         routerUsingAdmin(caddy([]))->ensureRunning();
     })->throws(PortConflictException::class, 'nginx already holds ports 80 and 443.');
+
+    it('throws a PortConflictException when a host process holds the web ports', function (): void {
+        Process::fake(['*lsof*' => "p123\ncnginx\n", '*' => '']);
+
+        routerUsingAdmin(caddy([]))->ensureRunning();
+    })->throws(PortConflictException::class, 'nginx already holds ports 80 and 443.');
+
+    it('does not start the router when a host process holds the web ports', function (): void {
+        Process::fake(['*lsof*' => "p123\ncnginx\n", '*' => '']);
+
+        expect(fn () => routerUsingAdmin(caddy([]))->ensureRunning())->toThrow(PortConflictException::class);
+
+        Process::assertNotRan(fn (PendingProcess $process): bool => ($process->command[1] ?? null) === 'run');
+    });
 
     it('starts the router container when it already exists', function (): void {
         Process::fake(["'docker' 'ps' '-a' '--format' '{{.Names}}'" => "rift-router\n", '*' => '']);

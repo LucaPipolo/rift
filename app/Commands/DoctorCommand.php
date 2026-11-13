@@ -167,7 +167,7 @@ final class DoctorCommand extends RiftCommand
                 "{$router->config->name} is running",
                 false,
                 $blocker !== null
-                    ? "{$blocker} is holding ports 80 and 443. Stop it, then run `rift router:start`."
+                    ? "{$blocker->name} is holding ports 80 and 443. Stop it, then run `rift router:start`."
                     : 'Run `rift router:start`.',
             );
 

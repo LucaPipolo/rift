@@ -8,6 +8,7 @@ use App\Config\ProjectConfig;
 use App\Config\RouterConfig;
 use App\Docker\ComposeFile;
 use App\Docker\Docker;
+use App\Env\SystemPortProbe;
 use App\Router\CaddyAdmin;
 use App\Router\CertificateAuthority;
 use App\Router\Router;
@@ -61,7 +62,7 @@ function routerUsingAdmin(CaddyAdmin $admin): Router
 {
     $docker = new Docker();
 
-    return new Router(new RouterConfig(), $admin, $docker, new CertificateAuthority(new RouterConfig(), $docker));
+    return new Router(new RouterConfig(), $admin, $docker, new CertificateAuthority(new RouterConfig(), $docker), new SystemPortProbe());
 }
 
 /**

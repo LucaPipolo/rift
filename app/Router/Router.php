@@ -6,6 +6,7 @@ namespace App\Router;
 
 use App\Checkout\Instance;
 use App\Config\RouterConfig;
+use App\Contracts\PortProbe;
 use App\Docker\Docker;
 use App\Exceptions\PortConflictException;
 use App\Exceptions\RouterException;
@@ -22,12 +23,14 @@ final readonly class Router
      * @param  CaddyAdmin  $admin  The admin API client.
      * @param  Docker  $docker  The Docker client.
      * @param  CertificateAuthority  $ca  The router's certificate authority.
+     * @param  PortProbe  $probe  The host port probe.
      */
     public function __construct(
         public RouterConfig $config,
         public CaddyAdmin $admin,
         public Docker $docker,
         public CertificateAuthority $ca,
+        public PortProbe $probe,
     ) {}
 
     /**
@@ -47,6 +50,7 @@ final readonly class Router
             docker: $docker,
             // Resolved from the container so tests can stand in for the OS and trust store.
             ca: app(CertificateAuthority::class, ['router' => $config, 'docker' => $docker]),
+            probe: app(PortProbe::class),
         );
     }
 
@@ -61,19 +65,13 @@ final readonly class Router
     }
 
     /**
-     * Get the container other than the router that holds ports 80 and 443, if any.
+     * Get the container or process other than the router that holds ports 80 and 443, if any.
      *
-     * @return string|null The blocking container, or null.
+     * @return PortHolder|null The blocking container or process, or null.
      */
-    public function blocker(): ?string
+    public function blocker(): ?PortHolder
     {
-        if ($this->isRunning()) {
-            return null;
-        }
-
-        $holder = $this->docker->portHolder();
-
-        return $holder === $this->config->container() ? null : $holder;
+        return $this->isRunning() ? null : $this->portHolder();
     }
 
     /**
@@ -107,7 +105,7 @@ final readonly class Router
             return false;
         }
 
-        if (($blocker = $this->docker->portHolder()) !== null) {
+        if (($blocker = $this->portHolder()) !== null) {
             throw new PortConflictException($blocker);
         }
 
@@ -179,6 +177,31 @@ final readonly class Router
         $this->admin->deregisterRoute($instance->routeId());
 
         return true;
+    }
+
+    /**
+     * Find what holds ports 80 or 443: a container first, then any process on the host.
+     *
+     * Docker only knows its own containers, so web servers such as Valet's nginx
+     * or a Podman container are only found through the host probe.
+     *
+     * @return PortHolder|null The holder, or null when the ports are free or held by the router.
+     */
+    private function portHolder(): ?PortHolder
+    {
+        $container = $this->docker->portHolder();
+
+        if ($container !== null) {
+            return $container === $this->config->container() ? null : new PortHolder($container);
+        }
+
+        foreach ([80, 443] as $port) {
+            if (($process = $this->probe->listener($port)) !== null) {
+                return new PortHolder($process, onHost: true);
+            }
+        }
+
+        return null;
     }
 
     /**

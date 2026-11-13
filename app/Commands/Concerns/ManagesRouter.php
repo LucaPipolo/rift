@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Commands\Concerns;
 
 use App\Exceptions\PortConflictException;
+use App\Router\PortHolder;
 use App\Router\Router;
 use App\Support\Outcome;
 
@@ -86,17 +87,21 @@ trait ManagesRouter
     /**
      * Render the notice asking the user to free ports 80 and 443.
      *
-     * @param  string  $holder  The container holding the ports.
+     * @param  PortHolder  $holder  The container or process holding the ports.
      *
      * @return void
      */
-    protected function reportPortConflict(string $holder): void
+    protected function reportPortConflict(PortHolder $holder): void
     {
-        $this->notice([
-            "<span class=\"font-bold\">{$holder}</span> already holds ports 80 and 443,",
-            "which rift's router needs. Stop it first, then try again:",
-            '',
-            "  <span class=\"font-bold\">docker stop {$holder}</span>",
-        ]);
+        $lines = [
+            "<span class=\"font-bold\">{$holder->name}</span> already holds ports 80 and 443,",
+            "which rift's router needs. Stop it first, then try again" . ($holder->onHost ? '.' : ':'),
+        ];
+
+        if (! $holder->onHost) {
+            $lines = [...$lines, '', "  <span class=\"font-bold\">docker stop {$holder->name}</span>"];
+        }
+
+        $this->notice($lines);
     }
 }
