@@ -226,6 +226,25 @@ describe('when the router is not running', function (): void {
     });
 });
 
+describe('when the running router was started with other ports', function (): void {
+    beforeEach(function (): void {
+        doctorPassingMachine(['*Config.Labels*' => "127.0.0.2:80:443\n"]);
+        routerServing([statusRoute('myapp', ['myapp.test'], 'myapp-app-1:80')]);
+    });
+
+    it('asks to restart the router', function (): void {
+        artisan('doctor')->expectsOutputToContain('It was started with other ports or another address. Run `rift router:restart`.');
+    });
+
+    it('keeps the router network check passing', function (): void {
+        artisan('doctor')->doesntExpectOutputToContain('Add `networks: [default, router]`');
+    });
+
+    it('exits with failure', function (): void {
+        artisan('doctor')->assertExitCode(1);
+    });
+});
+
 describe('when the admin API is not answering', function (): void {
     beforeEach(function (): void {
         doctorPassingMachine();

@@ -176,6 +176,13 @@ final class DoctorCommand extends RiftCommand
 
         $this->check("{$router->config->name} is running", true);
 
+        // A running router keeps the ports it started with until it is restarted.
+        $this->check(
+            "Router uses ports {$router->config->binding->describe()}",
+            ! $router->isStale(),
+            'It was started with other ports or another address. Run `rift router:restart`.',
+        );
+
         $routes = $router->admin->routeIds();
 
         $this->check(
