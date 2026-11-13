@@ -7,6 +7,7 @@ export GID := $(shell id -g)
 RUN := docker compose run --rm php
 BUN := docker compose run --rm bun
 GO := docker compose run --rm go
+VHS := ghcr.io/charmbracelet/vhs:v0.10.0
 
 TARGET := $(if $(filter Darwin,$(shell uname -s)),darwin,linux)-$(if $(filter arm64 aarch64,$(shell uname -m)),arm64,x86_64)
 
@@ -34,7 +35,7 @@ $(TOOL_ARGS): $(TOOL)
 endif
 
 else
-.PHONY: help image test test\:php test\:go test\:types test\:coverage sniff lint format shell rift build checksums clean
+.PHONY: help image test test\:php test\:go test\:types test\:coverage sniff lint format shell rift build demo checksums clean
 
 help: ## List the available targets
 	@grep -E '^[a-z\\:-]+:.*## ' $(MAKEFILE_LIST) | awk -F ': ## ' '{gsub(/\\/, "", $$1); printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -84,6 +85,10 @@ build: ## Build native rift and rift-dash binaries for this machine into builds/
 	rm -f builds/rift builds/rift-dash
 	cp builds/rift-$(TARGET) builds/rift
 	cp builds/rift-dash-$(TARGET) builds/rift-dash
+
+demo: ## Record .github/dash.gif, the dashboard demo in README.md, with VHS
+	$(GO) env CGO_ENABLED=0 go build -trimpath -o /app/builds/rift-dash-demo ./cmd/rift-dash
+	docker run --rm --user "$(UID):$(GID)" -e HOME=/tmp -v "$(CURDIR)":/app -w /app $(VHS) docker/demo/dash.tape
 
 checksums: ## Re-pin the PHP runtime checksums after changing PHP_VERSION in docker/build.sh
 	$(RUN) bash docker/build.sh --checksums
