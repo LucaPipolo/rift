@@ -401,6 +401,10 @@ sudo sh -c 'echo "nameserver 127.0.0.1" > /etc/resolver/rift'
 sudo brew services restart dnsmasq
 ```
 
+If the address is missing, `rift router:start` stops and shows the command
+to add it. `rift doctor` also checks that your project's domain resolves to
+it.
+
 Sharing ports 80 and 443 this way has been checked on macOS with [OrbStack].
 On Linux, `127.0.0.0/8` needs no alias, but a server listening on every
 address may still block the router.
@@ -419,7 +423,8 @@ For detailed command output, add `-v`, for example `rift up -v`. Without it,
 subprocess output goes to a log whose path is printed when a step fails.
 
 - The browser cannot find your domain: check that your local DNS resolves
-  `*.test` to `127.0.0.1`, or to your `router.bind` address.
+  `*.test` to `127.0.0.1`, or to your `router.bind` address. `rift doctor`
+  checks this for the current project.
 - `rift status` shows `(down)`: the app container is not running.
 - `rift status` shows `(unreachable)`: the container is running but has not
   joined the router network. Check the [Docker Compose] configuration in step 2.
