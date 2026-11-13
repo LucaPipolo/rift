@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Docker;
 
+use App\Config\PortBinding;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Process;
 
@@ -185,11 +186,13 @@ final class Docker
     }
 
     /**
-     * Get the container publishing port 80 or 443, if any.
+     * Get the container publishing a web port the router needs, if any.
+     *
+     * @param  PortBinding  $binding  The address and ports the router needs.
      *
      * @return string|null The container name, or null.
      */
-    public function portHolder(): ?string
+    public function portHolder(PortBinding $binding): ?string
     {
         $result = Process::run(['docker', 'ps', '--format', '{{.Names}}\t{{.Ports}}']);
 
@@ -198,14 +201,39 @@ final class Docker
         }
 
         foreach (explode("\n", trim($result->output())) as $line) {
-            if ($line === '' || ! preg_match('/:(80|443)->/', $line)) {
-                continue;
-            }
+            // In "0.0.0.0:443->443/tcp, [::]:443->443/tcp" each address and host port precede an arrow.
+            preg_match_all('/([^\s,]*):(\d+)->/', $line, $mappings, PREG_SET_ORDER);
 
-            return explode("\t", $line)[0];
+            foreach ($mappings as [, $address, $port]) {
+                if (in_array((int) $port, $binding->ports(), true) && $binding->covers($address)) {
+                    return explode("\t", $line)[0];
+                }
+            }
         }
 
         return null;
+    }
+
+    /**
+     * Get the value of a label on a container, running or not.
+     *
+     * @param  string  $container  The container name.
+     * @param  string  $label  The label key.
+     *
+     * @return string|null The value, or null when the label or the container is missing.
+     */
+    public function containerLabel(string $container, string $label): ?string
+    {
+        $result = Process::run([
+            'docker', 'inspect',
+            '--format', '{{index .Config.Labels "' . $label . '"}}',
+            $container,
+        ]);
+
+        $value = trim($result->output());
+
+        // Go templates print "<no value>" for a missing map key.
+        return $result->successful() && $value !== '' && $value !== '<no value>' ? $value : null;
     }
 
     /**

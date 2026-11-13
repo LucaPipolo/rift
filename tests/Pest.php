@@ -81,10 +81,11 @@ function probe(array $listening = [], array $published = []): PortProbe
          * Get a fixed process name for a port in the listening list.
          *
          * @param  int  $port  The host port.
+         * @param  string|null  $address  The address, ignored.
          *
          * @return string|null The process name, or null when the port is not listed.
          */
-        public function listener(int $port): ?string
+        public function listener(int $port, ?string $address = null): ?string
         {
             return $this->isListening($port) ? 'node' : null;
         }

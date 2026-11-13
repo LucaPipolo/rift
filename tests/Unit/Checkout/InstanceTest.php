@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Checkout\Instance;
+use App\Config\PortBinding;
 use App\Config\RouterConfig;
 
 describe('make()', function (): void {
@@ -93,6 +94,11 @@ describe('urls()', function (): void {
         expect(myapp(['hosts' => ['api', 'admin']])->urls())
             ->toBe(['https://myapp.test', 'https://api.myapp.test', 'https://admin.myapp.test']);
     });
+
+    it('adds the HTTPS port to every URL when the router does not use 443', function (): void {
+        expect(onPort(myapp(['hosts' => ['api']]), 8443)->urls())
+            ->toBe(['https://myapp.test:8443', 'https://api.myapp.test:8443']);
+    });
 });
 
 describe('url()', function (): void {
@@ -103,7 +109,24 @@ describe('url()', function (): void {
     it('returns the HTTPS URL of the worktree domain', function (): void {
         expect(myapp(['hosts' => ['api']], slug: 'feat-x')->url())->toBe('https://feat-x.myapp.test');
     });
+
+    it('adds the HTTPS port when the router does not use 443', function (): void {
+        expect(onPort(myapp(), 8443)->url())->toBe('https://myapp.test:8443');
+    });
 });
+
+/**
+ * Serve an instance through a router on another HTTPS host port.
+ *
+ * @param  Instance  $instance  The instance.
+ * @param  int  $https  The HTTPS host port.
+ *
+ * @return Instance The instance on that port.
+ */
+function onPort(Instance $instance, int $https): Instance
+{
+    return new Instance($instance->checkout, $instance->config, new RouterConfig(binding: new PortBinding(https: $https)));
+}
 
 describe('needsOwnWildcard()', function (): void {
     it('returns false for the main checkout without aliases', function (): void {

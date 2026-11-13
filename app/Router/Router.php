@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Router;
 
 use App\Checkout\Instance;
+use App\Config\PortBinding;
 use App\Config\RouterConfig;
 use App\Contracts\PortProbe;
 use App\Docker\Docker;
@@ -16,6 +17,8 @@ use App\Exceptions\RouterException;
  */
 final readonly class Router
 {
+    private const string BINDING_LABEL = 'dev.rift.binding';
+
     /**
      * Create a new router instance.
      *
@@ -65,7 +68,7 @@ final readonly class Router
     }
 
     /**
-     * Get the container or process other than the router that holds ports 80 and 443, if any.
+     * Get the container or process other than the router that holds its web ports, if any.
      *
      * @return PortHolder|null The blocking container or process, or null.
      */
@@ -106,12 +109,14 @@ final readonly class Router
         }
 
         if (($blocker = $this->portHolder()) !== null) {
-            throw new PortConflictException($blocker);
+            throw new PortConflictException($blocker, $this->config->binding);
         }
 
-        $started = $this->docker->containerExists($this->config->container())
-            ? $this->docker->startContainer($this->config->container())
-            : $this->docker->runContainer($this->runArguments());
+        $started = match (true) {
+            ! $this->docker->containerExists($this->config->container()) => $this->docker->runContainer($this->runArguments()),
+            $this->isStale() => $this->recreate(),
+            default => $this->docker->startContainer($this->config->container()),
+        };
 
         if (! $started) {
             throw new RouterException('Could not start the router.');
@@ -180,7 +185,37 @@ final readonly class Router
     }
 
     /**
-     * Find what holds ports 80 or 443: a container first, then any process on the host.
+     * Determine whether the router container was created with another port binding.
+     *
+     * Docker cannot change a container's published ports, so a stale one has to
+     * be recreated. Containers from before the binding was configurable carry no
+     * label, and were created with the default one.
+     *
+     * @return bool Whether the container must be recreated to apply the config.
+     */
+    public function isStale(): bool
+    {
+        $created = $this->docker->containerLabel($this->config->container(), self::BINDING_LABEL)
+            ?? new PortBinding()->label();
+
+        return $created !== $this->config->binding->label();
+    }
+
+    /**
+     * Remove the router container and create it again from the config.
+     *
+     * Certificates and the autosaved config live in volumes, so they survive.
+     *
+     * @return bool Whether the new container started.
+     */
+    private function recreate(): bool
+    {
+        return $this->docker->removeContainer($this->config->container())
+            && $this->docker->runContainer($this->runArguments());
+    }
+
+    /**
+     * Find what holds the web ports: a container first, then any process on the host.
      *
      * Docker only knows its own containers, so web servers such as Valet's nginx
      * or a Podman container are only found through the host probe.
@@ -189,14 +224,15 @@ final readonly class Router
      */
     private function portHolder(): ?PortHolder
     {
-        $container = $this->docker->portHolder();
+        $binding = $this->config->binding;
+        $container = $this->docker->portHolder($binding);
 
         if ($container !== null) {
             return $container === $this->config->container() ? null : new PortHolder($container);
         }
 
-        foreach ([80, 443] as $port) {
-            if (($process = $this->probe->listener($port)) !== null) {
+        foreach ($binding->ports() as $port) {
+            if (($process = $this->probe->listener($port, $binding->address)) !== null) {
                 return new PortHolder($process, onHost: true);
             }
         }
@@ -211,13 +247,18 @@ final readonly class Router
      */
     private function runArguments(): array
     {
+        // Caddy keeps listening on 80 and 443 inside the container; only the host side moves.
+        $binding = $this->config->binding;
+
         return [
             '--name', $this->config->container(),
             '--network', $this->config->network(),
             '--restart', 'unless-stopped',
-            '-p', '80:80',
-            '-p', '443:443',
-            '-p', '443:443/udp',
+            '--label', self::BINDING_LABEL . '=' . $binding->label(),
+            '-p', $binding->publish($binding->http) . ':80',
+            '-p', $binding->publish($binding->https) . ':443',
+            '-p', $binding->publish($binding->https) . ':443/udp',
+            // The admin API has no authentication, so it never leaves this machine.
             '-p', '127.0.0.1:2019:2019',
             '-v', $this->config->dataVolume() . ':/data',
             '-v', $this->config->configVolume() . ':/config',

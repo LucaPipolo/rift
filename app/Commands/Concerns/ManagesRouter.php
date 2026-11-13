@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Commands\Concerns;
 
+use App\Config\PortBinding;
 use App\Exceptions\PortConflictException;
 use App\Router\PortHolder;
 use App\Router\Router;
@@ -36,13 +37,13 @@ trait ManagesRouter
             } catch (PortConflictException $e) {
                 $conflict = $e;
 
-                return Outcome::failed('ports 80/443 in use');
+                return Outcome::failed("ports {$router->config->binding->http}/{$router->config->binding->https} in use");
             }
         });
 
         if ($started->fatal) {
             if ($conflict !== null) {
-                $this->reportPortConflict($conflict->holder);
+                $this->reportPortConflict($conflict->holder, $router->config->binding);
             }
 
             return false;
@@ -85,16 +86,17 @@ trait ManagesRouter
     }
 
     /**
-     * Render the notice asking the user to free ports 80 and 443.
+     * Render the notice asking the user to free the router's web ports.
      *
      * @param  PortHolder  $holder  The container or process holding the ports.
+     * @param  PortBinding  $binding  The binding the router needs.
      *
      * @return void
      */
-    protected function reportPortConflict(PortHolder $holder): void
+    protected function reportPortConflict(PortHolder $holder, PortBinding $binding): void
     {
         $lines = [
-            "<span class=\"font-bold\">{$holder->name}</span> already holds ports 80 and 443,",
+            "<span class=\"font-bold\">{$holder->name}</span> already holds ports {$binding->describe()},",
             "which rift's router needs. Stop it first, then try again" . ($holder->onHost ? '.' : ':'),
         ];
 

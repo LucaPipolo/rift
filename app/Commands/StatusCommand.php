@@ -62,7 +62,7 @@ final class StatusCommand extends RiftCommand
         $running = $router->docker->runningNames();
         $reachable = $router->docker->networkMembers($router->config->network());
 
-        Ui::rule($router->config->name, ':80 :443');
+        Ui::rule($router->config->name, $router->config->binding->listening());
 
         if ($groups === []) {
             Ui::blank();

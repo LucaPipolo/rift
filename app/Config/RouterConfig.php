@@ -20,11 +20,13 @@ final readonly class RouterConfig
      * @param  string  $name  The router name shared by its container, network and volumes.
      * @param  string  $image  The Caddy image.
      * @param  string  $admin  The admin API URL.
+     * @param  PortBinding  $binding  The host address and ports for web traffic.
      */
     public function __construct(
         public string $name = self::DEFAULT_NAME,
         public string $image = 'caddy:latest',
         public string $admin = 'http://localhost:2019',
+        public PortBinding $binding = new PortBinding(),
     ) {}
 
     /**
@@ -79,10 +81,33 @@ final readonly class RouterConfig
             throw new ConfigException("{$path}: router `name`, `image`, and `admin` must be strings.");
         }
 
+        $bind = $router['bind'] ?? $defaults->binding->address;
+        $http = $router['http'] ?? $defaults->binding->http;
+        $https = $router['https'] ?? $defaults->binding->https;
+
+        // IPv6 is left out: Docker needs it bracketed, and a loopback alias covers the use case.
+        if ($bind !== null && (! is_string($bind) || filter_var($bind, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) === false)) {
+            throw new ConfigException("{$path}: router `bind` must be an IPv4 address.");
+        }
+
+        if (! self::isPort($http) || ! self::isPort($https)) {
+            throw new ConfigException("{$path}: router `http` and `https` must be ports between 1 and 65535.");
+        }
+
+        if ($http === $https) {
+            throw new ConfigException("{$path}: router `http` and `https` must be different ports.");
+        }
+
         return new self(
             name: $name,
             image: $image,
             admin: rtrim($admin, '/'),
+            binding: new PortBinding(
+                // 0.0.0.0 is the default every-address binding spelled out, not one address to match.
+                address: $bind === '0.0.0.0' ? null : $bind,
+                http: $http,
+                https: $https,
+            ),
         );
     }
 
@@ -149,6 +174,25 @@ final readonly class RouterConfig
             return $this;
         }
 
-        return new self(name: $name, image: $this->image, admin: $this->admin);
+        return new self(
+            name: $name,
+            image: $this->image,
+            admin: $this->admin,
+            binding: $this->binding,
+        );
+    }
+
+    /**
+     * Determine whether a config value is a valid port number.
+     *
+     * @param  mixed  $value  The config value.
+     *
+     * @return bool Whether it is an integer between 1 and 65535.
+     *
+     * @phpstan-assert-if-true int $value
+     */
+    private static function isPort(mixed $value): bool
+    {
+        return is_int($value) && $value >= 1 && $value <= 65535;
     }
 }

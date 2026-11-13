@@ -54,6 +54,14 @@ describe('listener()', function (): void {
 
         Process::assertRan(['lsof', '-nP', '-iTCP:443', '-sTCP:LISTEN', '-Fc']);
     });
+
+    it('asks lsof only about listeners on the given address', function (): void {
+        Process::fake(['*lsof*' => Process::result('', '', 1)]);
+
+        new SystemPortProbe()->listener(443, '127.0.0.2');
+
+        Process::assertRan(['lsof', '-nP', '-iTCP@127.0.0.2:443', '-sTCP:LISTEN', '-Fc']);
+    });
 });
 
 describe('publishedBy()', function (): void {

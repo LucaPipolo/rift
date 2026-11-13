@@ -135,7 +135,7 @@ describe('when accepting every default', function (): void {
 
         lifecycleInitWithDefaults()->run();
 
-        expect(ProjectConfig::load($root)->env)->toBe(['APP_URL' => 'https://{domain}']);
+        expect(ProjectConfig::load($root)->env)->toBe(['APP_URL' => '{url}']);
     });
 
     it('leaves APP_URL alone', function (array $files): void {

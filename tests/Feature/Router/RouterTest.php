@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Config\PortBinding;
 use App\Config\RouterConfig;
 use App\Exceptions\PortConflictException;
 use App\Exceptions\RouterException;
@@ -61,6 +62,21 @@ describe('blocker()', function (): void {
         Process::fake(['*Ports*' => "traefik\t0.0.0.0:443->443/tcp\n", '*lsof*' => "p123\ncnginx\n", '*' => '']);
 
         expect(routerUsingAdmin(caddy([]))->blocker())->toEqual(new PortHolder('traefik'));
+    });
+
+    it('probes the host for listeners on the bind address and configured ports', function (): void {
+        Process::fake(['*' => '']);
+
+        routerUsingAdmin(caddy([]), new RouterConfig(binding: new PortBinding(address: '127.0.0.2', http: 8080, https: 8443)))->blocker();
+
+        Process::assertRan(['lsof', '-nP', '-iTCP@127.0.0.2:8080', '-sTCP:LISTEN', '-Fc']);
+        Process::assertRan(['lsof', '-nP', '-iTCP@127.0.0.2:8443', '-sTCP:LISTEN', '-Fc']);
+    });
+
+    it('ignores containers on another address than the bind address', function (): void {
+        Process::fake(['*Ports*' => "nginx\t127.0.0.1:443->443/tcp\n", '*' => '']);
+
+        expect(routerUsingAdmin(caddy([]), new RouterConfig(binding: new PortBinding(address: '127.0.0.2')))->blocker())->toBeNull();
     });
 
     it('ignores host listeners when the router itself holds the web ports', function (): void {
@@ -169,6 +185,7 @@ describe('ensureRunning()', function (): void {
             '--name', 'rift-router',
             '--network', 'rift-router',
             '--restart', 'unless-stopped',
+            '--label', 'dev.rift.binding=:80:443',
             '-p', '80:80',
             '-p', '443:443',
             '-p', '443:443/udp',
@@ -190,6 +207,68 @@ describe('ensureRunning()', function (): void {
             && ! in_array('2019:2019', $process->command, true));
     });
 
+    it('publishes the configured web ports on the bind address', function (): void {
+        Process::fake(['*' => '']);
+
+        routerUsingAdmin(caddy([]), new RouterConfig(binding: new PortBinding(address: '127.0.0.2', http: 8080, https: 8443)))->ensureRunning();
+
+        Process::assertRan(fn (PendingProcess $process): bool => is_array($process->command)
+            && array_slice($process->command, 9, 10) === [
+                '--label', 'dev.rift.binding=127.0.0.2:8080:8443',
+                '-p', '127.0.0.2:8080:80',
+                '-p', '127.0.0.2:8443:443',
+                '-p', '127.0.0.2:8443:443/udp',
+                '-p', '127.0.0.1:2019:2019',
+            ]);
+    });
+
+    it('starts an existing container created with the configured bindings', function (): void {
+        Process::fake([
+            "'docker' 'ps' '-a' '--format' '{{.Names}}'" => "rift-router\n",
+            '*docker*inspect*' => "127.0.0.2:8080:8443\n",
+            '*' => '',
+        ]);
+
+        routerUsingAdmin(caddy([]), new RouterConfig(binding: new PortBinding(address: '127.0.0.2', http: 8080, https: 8443)))->ensureRunning();
+
+        Process::assertRan(fn (PendingProcess $process): bool => $process->command === ['docker', 'start', 'rift-router']);
+    });
+
+    it('recreates an existing container created with other bindings', function (string $label): void {
+        Process::fake([
+            "'docker' 'ps' '-a' '--format' '{{.Names}}'" => "rift-router\n",
+            '*docker*inspect*' => $label,
+            '*' => '',
+        ]);
+
+        routerUsingAdmin(caddy([]), new RouterConfig(binding: new PortBinding(https: 8443)))->ensureRunning();
+
+        Process::assertRan(fn (PendingProcess $process): bool => $process->command === ['docker', 'rm', '-f', 'rift-router']);
+        Process::assertRan(fn (PendingProcess $process): bool => ($process->command[1] ?? null) === 'run');
+    })->with([
+        'other bindings' => ['127.0.0.2:80:443'],
+        'no label, from before bindings were configurable' => [''],
+    ]);
+
+    it('does not create a new container when the stale one cannot be removed', function (): void {
+        Process::fake([
+            "'docker' 'ps' '-a' '--format' '{{.Names}}'" => "rift-router\n",
+            '*docker*rm*' => Process::result(exitCode: 1),
+            '*' => '',
+        ]);
+
+        expect(fn () => routerUsingAdmin(caddy([]), new RouterConfig(binding: new PortBinding(https: 8443)))->ensureRunning())
+            ->toThrow(RouterException::class, 'Could not start the router.');
+
+        Process::assertNotRan(fn (PendingProcess $process): bool => ($process->command[1] ?? null) === 'run');
+    });
+
+    it('names the configured ports when another container holds them', function (): void {
+        Process::fake(['*Ports*' => "nginx\t0.0.0.0:8443->443/tcp\n", '*' => '']);
+
+        routerUsingAdmin(caddy([]), new RouterConfig(binding: new PortBinding(http: 8080, https: 8443)))->ensureRunning();
+    })->throws(PortConflictException::class, 'nginx already holds ports 8080 and 8443.');
+
     it('returns true when the router starts and its admin API answers', function (): void {
         Process::fake(['*' => '']);
 
@@ -209,6 +288,26 @@ describe('ensureRunning()', function (): void {
 
         routerUsingAdmin(new CaddyAdmin(new RouterConfig()))->ensureRunning();
     })->throws(RouterException::class, 'The router started but its admin API never answered.');
+});
+
+describe('isStale()', function (): void {
+    it('returns false when the container was created with the configured bindings', function (): void {
+        Process::fake(['*docker*inspect*' => "127.0.0.2:8080:8443\n", '*' => '']);
+
+        expect(routerUsingAdmin(caddy([]), new RouterConfig(binding: new PortBinding(address: '127.0.0.2', http: 8080, https: 8443)))->isStale())->toBeFalse();
+    });
+
+    it('returns true when the container was created with other bindings', function (): void {
+        Process::fake(['*docker*inspect*' => ":80:443\n", '*' => '']);
+
+        expect(routerUsingAdmin(caddy([]), new RouterConfig(binding: new PortBinding(https: 8443)))->isStale())->toBeTrue();
+    });
+
+    it('treats an unlabelled container as created with the defaults', function (): void {
+        Process::fake(['*' => '']);
+
+        expect(routerUsingAdmin(caddy([]))->isStale())->toBeFalse();
+    });
 });
 
 describe('stop()', function (): void {

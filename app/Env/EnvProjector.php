@@ -75,7 +75,7 @@ final readonly class EnvProjector
         }
 
         // Templates render against everything already derived, so a project can
-        // write APP_URL: "https://{domain}" or reference {VITE_PORT}.
+        // write APP_URL: "{url}" or reference {VITE_PORT}.
         $context = $values + [
             'name' => $config->name,
             'compose_name' => $composeName,

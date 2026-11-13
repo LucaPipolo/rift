@@ -30,17 +30,19 @@ final class SystemPortProbe implements PortProbe
     /**
      * Get the name of the process listening on the port, if any.
      *
-     * lsof only sees what it can: without root it misses other users' processes,
-     * such as a web server running as root, and when it is not installed it finds
-     * nothing, leaving Docker's own "port is already allocated" error.
+     * Without root lsof misses other users' processes, such as a web server running
+     * as root, and without lsof nothing is found, leaving Docker's own error. With an
+     * address, listeners on every address are skipped: on macOS they do not block a
+     * loopback alias.
      *
      * @param  int  $port  The host port.
+     * @param  string|null  $address  Only a listener on this exact address, or null for any.
      *
      * @return string|null The process name, or null when nothing listens or the listener is hidden.
      */
-    public function listener(int $port): ?string
+    public function listener(int $port, ?string $address = null): ?string
     {
-        $result = Process::run(['lsof', '-nP', '-iTCP:' . $port, '-sTCP:LISTEN', '-Fc']);
+        $result = Process::run(['lsof', '-nP', "-iTCP{$this->at($address)}:{$port}", '-sTCP:LISTEN', '-Fc']);
 
         // With -Fc each process is a "p<pid>" line followed by a "c<command>" line.
         if (! $result->successful() || ! preg_match('/^c(.+)$/m', $result->output(), $match)) {
@@ -79,5 +81,17 @@ final class SystemPortProbe implements PortProbe
         }
 
         return $this->published[$composeProject] = $ports;
+    }
+
+    /**
+     * Get the lsof address qualifier for an address.
+     *
+     * @param  string|null  $address  The address, or null for any.
+     *
+     * @return string The "@address" qualifier, or an empty string.
+     */
+    private function at(?string $address): string
+    {
+        return $address === null ? '' : '@' . $address;
     }
 }

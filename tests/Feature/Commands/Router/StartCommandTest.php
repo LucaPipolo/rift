@@ -182,6 +182,26 @@ describe('when a host process holds ports 80 and 443', function (): void {
     });
 });
 
+describe('when another container holds the configured router ports', function (): void {
+    beforeEach(function (): void {
+        // project() points XDG_CONFIG_HOME at its own .config directory.
+        $root = project();
+        mkdir($root . '/.config/rift', 0o777, true);
+        file_put_contents($root . '/.config/rift/config.yaml', "router:\n  http: 8080\n  https: 8443\n");
+
+        host($root, ['*Ports*' => "traefik\t0.0.0.0:8443->443/tcp\n", '*docker*ps*' => '']);
+        caddy([]);
+    });
+
+    it('marks the start step as blocked by the configured ports', function (): void {
+        artisan('router:start')->expectsOutputToContain('ports 8080/8443 in use');
+    });
+
+    it('names the configured ports in the notice', function (): void {
+        artisan('router:start')->expectsOutputToContain('traefik already holds ports 8080 and 8443,');
+    });
+});
+
 describe('when the router container fails to start', function (): void {
     beforeEach(function (): void {
         host(project(), ['*docker*ps*' => '', "*docker*'run'*" => Process::result(exitCode: 1)]);

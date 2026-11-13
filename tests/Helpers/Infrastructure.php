@@ -52,17 +52,18 @@ function myappRootedAt(string $root, array $config = []): Instance
 }
 
 /**
- * Create a router with the default config whose admin API is the given client.
+ * Create a router whose admin API is the given client.
  *
  * @param  CaddyAdmin  $admin  The admin API client, usually faked by caddy().
+ * @param  RouterConfig  $config  The router's settings.
  *
  * @return Router The router.
  */
-function routerUsingAdmin(CaddyAdmin $admin): Router
+function routerUsingAdmin(CaddyAdmin $admin, RouterConfig $config = new RouterConfig()): Router
 {
     $docker = new Docker();
 
-    return new Router(new RouterConfig(), $admin, $docker, new CertificateAuthority(new RouterConfig(), $docker), new SystemPortProbe());
+    return new Router($config, $admin, $docker, new CertificateAuthority($config, $docker), new SystemPortProbe());
 }
 
 /**
