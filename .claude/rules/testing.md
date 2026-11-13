@@ -17,7 +17,7 @@ boots the application through `Tests\TestCase`); every other class goes in `test
 
 Shared helpers live in `tests/Helpers/*.php` as plain functions with full docblocks, loaded by `tests/Pest.php`. Look
 there before writing setup by hand: `project()`, `host()`, `artisan()` and `answerPrompts()` for commands, `myapp()`,
-`probe()` and `caddy()` for building instances and fakes. A helper used by one file stays in that file.
+`probe()`, `fakeNetwork()` and `caddy()` for building instances and fakes. A helper used by one file stays in that file.
 
 ## Coverage
 
@@ -46,6 +46,9 @@ facade call or a contract, see the PHP rules), not an ignore comment.
 - Nothing reaches the real machine. Fake processes with `Process::fake()`, Caddy's admin API with `Http::fake()`,
   waits with `Sleep::fake()`, and host questions with the contract fakes in `tests/Pest.php`. Files go in a
   `scratch()` directory, never the repository or the real home directory.
+- A feature test that runs a process with no matching fake fails, because `tests/Pest.php` prevents stray processes.
+  Add the fake. Only a test that needs real output a fake can't produce, such as streamed output, opts out with
+  `Process::preventStrayProcesses(false)` and a comment above its `it()` saying why.
 - Fake only what the test needs to control. A fake that answers everything hides which call the behaviour depends on.
 - Before trusting a new test, see it fail: break the code or the expectation once. A test that passes for the wrong
   reason, such as a fake that matches a command the code never runs, hides the gap it was meant to close.

@@ -19,6 +19,9 @@ client). A route is per checkout, so `down` in one worktree removes only its rou
 Caddy issues certificates from its own local CA; `CertificateAuthority` extracts it and adds it to the macOS or Linux
 system trust store, matched by fingerprint, because every Caddy CA has the same name.
 
+The host address and ports the router publishes come from the global config as a `PortBinding`. Docker cannot change a
+container's published ports, so the container is labelled with its binding and recreated when the config differs.
+
 ## `.env` projection
 
 Rift does not template Compose files. `EnvProjector` writes the values it derives for a checkout (Compose project
@@ -40,16 +43,18 @@ host goes through something tests can replace:
 - Processes (Docker, Git, `security`, `openssl`) run through Laravel's `Process` facade, faked with `Process::fake()`.
 - Caddy's admin API runs through the `Http` facade, faked with `Http::fake()`.
 - Waits use `Sleep`, faked with `Sleep::fake()`.
-- Anything else the host answers (which ports are listening) sits behind an interface in `app/Contracts/`, such as
-  `PortProbe`, with the real implementation bound in `AppServiceProvider` and a fake in `tests/Pest.php`.
+- Anything else the host answers (which ports are listening, how names resolve, which addresses it holds) sits
+  behind an interface in `app/Contracts/`, such as `PortProbe` and `Network`, with the real implementation bound in
+  `AppServiceProvider` and a fake in `tests/Pest.php`.
 
-A new host interaction follows one of these patterns, so no test ever reaches the real machine.
+A new host interaction follows one of these patterns, so no test ever reaches the real machine. `tests/Pest.php`
+enforces it for processes: a feature test that runs one with no matching fake fails instead.
 
 ## Errors
 
 `app/Exceptions/` holds the errors a user can act on: `ConfigException` (fix `rift.yaml`, `.env` or the checkout),
-`RouterException`, and `PortConflictException`. Commands turn them into a failed step or a `bail()` message rather
-than a stack trace.
+`RouterException`, `PortConflictException` and `AddressNotAssignedException`. Commands turn them into a failed step,
+a notice with the fix, or a `bail()` message rather than a stack trace.
 
 ## Distribution
 

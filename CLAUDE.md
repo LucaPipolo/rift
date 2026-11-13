@@ -27,11 +27,11 @@ own beyond `rift.yaml` in a project and the global router config.
 app/
 ├── Checkout/      a Git checkout (Checkout), its locator, and the Instance it is served as
 ├── Commands/      the CLI; router:* lives in Commands/Router, shared steps in Commands/Concerns
-├── Config/        rift.yaml (ProjectConfig), the global router config (RouterConfig), the init template
+├── Config/        rift.yaml (ProjectConfig), the global router config (RouterConfig, PortBinding), the init template
 ├── Contracts/     interfaces for what touches the host, so tests can swap in fakes
 ├── Docker/        the Docker CLI, Compose files, and the runner for containers and hooks
 ├── Enums/         presets, hook stages, container states
-├── Env/           projecting derived values into .env, and resolving free host ports
+├── Env/           projecting derived values into .env, free host ports, name resolution and addresses
 ├── Exceptions/    errors the user can act on
 ├── Providers/     container bindings (AppServiceProvider)
 ├── Router/        the shared Caddy router, its admin API and its local CA
