@@ -89,7 +89,7 @@ app/
 ├── Contracts/    interfaces
 ├── Docker/       the Docker CLI, Compose files and the container runner
 ├── Enums/        presets, hook stages and container states
-├── Env/          .env projection and host port resolution
+├── Env/          .env projection, host ports, name resolution and addresses
 ├── Exceptions/   errors the user can act on
 ├── Providers/    container bindings
 ├── Router/       the shared Caddy router, its admin API and its CA
