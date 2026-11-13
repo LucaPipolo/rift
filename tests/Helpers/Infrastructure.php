@@ -6,6 +6,7 @@ use App\Checkout\Checkout;
 use App\Checkout\Instance;
 use App\Config\ProjectConfig;
 use App\Config\RouterConfig;
+use App\Contracts\Network;
 use App\Docker\ComposeFile;
 use App\Docker\Docker;
 use App\Env\SystemPortProbe;
@@ -56,14 +57,22 @@ function myappRootedAt(string $root, array $config = []): Instance
  *
  * @param  CaddyAdmin  $admin  The admin API client, usually faked by caddy().
  * @param  RouterConfig  $config  The router's settings.
+ * @param  Network|null  $network  This machine's addresses, or null for one holding 127.0.0.2.
  *
  * @return Router The router.
  */
-function routerUsingAdmin(CaddyAdmin $admin, RouterConfig $config = new RouterConfig()): Router
+function routerUsingAdmin(CaddyAdmin $admin, RouterConfig $config = new RouterConfig(), ?Network $network = null): Router
 {
     $docker = new Docker();
 
-    return new Router($config, $admin, $docker, new CertificateAuthority($config, $docker), new SystemPortProbe());
+    return new Router(
+        $config,
+        $admin,
+        $docker,
+        new CertificateAuthority($config, $docker),
+        new SystemPortProbe(),
+        $network ?? fakeNetwork(assigned: ['127.0.0.2']),
+    );
 }
 
 /**

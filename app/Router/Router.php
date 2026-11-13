@@ -7,8 +7,10 @@ namespace App\Router;
 use App\Checkout\Instance;
 use App\Config\PortBinding;
 use App\Config\RouterConfig;
+use App\Contracts\Network;
 use App\Contracts\PortProbe;
 use App\Docker\Docker;
+use App\Exceptions\AddressNotAssignedException;
 use App\Exceptions\PortConflictException;
 use App\Exceptions\RouterException;
 
@@ -27,6 +29,7 @@ final readonly class Router
      * @param  Docker  $docker  The Docker client.
      * @param  CertificateAuthority  $ca  The router's certificate authority.
      * @param  PortProbe  $probe  The host port probe.
+     * @param  Network  $network  This machine's addresses.
      */
     public function __construct(
         public RouterConfig $config,
@@ -34,6 +37,7 @@ final readonly class Router
         public Docker $docker,
         public CertificateAuthority $ca,
         public PortProbe $probe,
+        public Network $network,
     ) {}
 
     /**
@@ -54,6 +58,7 @@ final readonly class Router
             // Resolved from the container so tests can stand in for the OS and trust store.
             ca: app(CertificateAuthority::class, ['router' => $config, 'docker' => $docker]),
             probe: app(PortProbe::class),
+            network: app(Network::class),
         );
     }
 
@@ -99,6 +104,7 @@ final readonly class Router
      *
      * @return bool Whether the router was started.
      *
+     * @throws AddressNotAssignedException
      * @throws PortConflictException
      * @throws RouterException
      */
@@ -106,6 +112,13 @@ final readonly class Router
     {
         if ($this->isRunning()) {
             return false;
+        }
+
+        $address = $this->config->binding->address;
+
+        // Docker only says "cannot assign requested address" when an alias is missing.
+        if ($address !== null && ! $this->network->hasAddress($address)) {
+            throw new AddressNotAssignedException($address, $this->network->howToAssign($address));
         }
 
         if (($blocker = $this->portHolder()) !== null) {

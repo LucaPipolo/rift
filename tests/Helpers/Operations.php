@@ -69,6 +69,7 @@ function routerWithScratchTrustStore(): string
         $docker,
         new CertificateAuthority($config, $docker, 'Linux', $directory),
         app(PortProbe::class),
+        app(Network::class),
     ));
 
     return $directory;

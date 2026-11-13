@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Contracts\Network;
 use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\Process;
 
@@ -199,6 +200,36 @@ describe('when another container holds the configured router ports', function ()
 
     it('names the configured ports in the notice', function (): void {
         artisan('router:start')->expectsOutputToContain('traefik already holds ports 8080 and 8443,');
+    });
+});
+
+describe('when the bind address is not assigned to this machine', function (): void {
+    beforeEach(function (): void {
+        $root = project();
+        mkdir($root . '/.config/rift', 0o777, true);
+        file_put_contents($root . '/.config/rift/config.yaml', "router:\n  bind: 127.0.0.2\n");
+        app()->instance(Network::class, fakeNetwork());
+
+        host($root, ['*docker*ps*' => '']);
+        caddy([]);
+    });
+
+    it('marks the start step as blocked by the address', function (): void {
+        artisan('router:start')->expectsOutputToContain('127.0.0.2 not assigned');
+    });
+
+    it('shows how to assign the address', function (): void {
+        artisan('router:start')->expectsOutputToContain('so the router cannot listen on it. Assign 127.0.0.2.');
+    });
+
+    it('does not create the router container', function (): void {
+        artisan('router:start')->run();
+
+        Process::assertNotRan(fn (PendingProcess $process): bool => ($process->command[1] ?? null) === 'run');
+    });
+
+    it('exits with failure', function (): void {
+        artisan('router:start')->assertExitCode(1);
     });
 });
 
