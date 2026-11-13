@@ -99,3 +99,12 @@ describe('requires()', function (): void {
         'sail needs its binary' => [Preset::Sail, 'vendor/bin/sail'],
     ]);
 });
+
+describe('shellCommand()', function (): void {
+    it('opens bash in the service where it has it, sh otherwise', function (Preset $preset, array $prefix): void {
+        expect($preset->shellCommand('web'))->toBe([...$prefix, 'sh', '-c', 'command -v bash >/dev/null && exec bash || exec sh']);
+    })->with([
+        'compose' => [Preset::Compose, ['docker', 'compose', 'exec', 'web']],
+        'sail' => [Preset::Sail, ['./vendor/bin/sail', 'exec', 'web']],
+    ]);
+});

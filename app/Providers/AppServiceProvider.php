@@ -8,6 +8,7 @@ use App\Config\ProjectRegistry;
 use App\Config\RouterConfig;
 use App\Contracts\Network;
 use App\Contracts\PortProbe;
+use App\Dashboard\Input;
 use App\Env\SystemNetwork;
 use App\Env\SystemPortProbe;
 use App\Router\Router;
@@ -34,6 +35,8 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->bind(PortProbe::class, SystemPortProbe::class);
 
         $this->app->bind(Network::class, SystemNetwork::class);
+
+        $this->app->bind(Input::class, fn () => new Input(STDIN));
 
         $this->app->bind(Router::class, fn (Application $app) => Router::for($app->make(RouterConfig::class)));
     }

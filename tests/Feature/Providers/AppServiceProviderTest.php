@@ -6,6 +6,7 @@ use App\Config\ProjectRegistry;
 use App\Config\RouterConfig;
 use App\Contracts\Network;
 use App\Contracts\PortProbe;
+use App\Dashboard\Input;
 use App\Env\SystemNetwork;
 use App\Env\SystemPortProbe;
 use App\Router\Router;
@@ -37,6 +38,10 @@ describe('register()', function (): void {
 
     it('asks the system about the network', function (): void {
         expect(app(Network::class)::class)->toBe(SystemNetwork::class);
+    });
+
+    it('reads rift-dash\'s requests from standard input', function (): void {
+        expect(app(Input::class))->toEqual(new Input(STDIN));
     });
 
     it('builds the router from the shared router config', function (): void {
