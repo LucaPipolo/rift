@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Config\PortBinding;
 use App\Docker\Docker;
 use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\Process;
@@ -272,7 +273,7 @@ describe('portHolder()', function (): void {
     it('returns the container publishing a web port', function (string $ports): void {
         Process::fake(['*docker*ps*' => "db\t0.0.0.0:5432->5432/tcp\nweb\t{$ports}\n"]);
 
-        expect((new Docker())->portHolder())->toBe('web');
+        expect((new Docker())->portHolder(new PortBinding()))->toBe('web');
     })->with([
         'port 80' => ['0.0.0.0:80->80/tcp'],
         'port 443' => ['0.0.0.0:443->443/tcp'],
@@ -281,25 +282,79 @@ describe('portHolder()', function (): void {
     it('returns the first container when several publish web ports', function (): void {
         Process::fake(['*docker*ps*' => "first\t0.0.0.0:80->80/tcp\nsecond\t0.0.0.0:443->443/tcp\n"]);
 
-        expect((new Docker())->portHolder())->toBe('first');
+        expect((new Docker())->portHolder(new PortBinding()))->toBe('first');
     });
 
     it('returns null when no container publishes port 80 or 443', function (): void {
         Process::fake(['*docker*ps*' => "db\t0.0.0.0:5432->5432/tcp\nvite\t0.0.0.0:8080->5173/tcp\n"]);
 
-        expect((new Docker())->portHolder())->toBeNull();
+        expect((new Docker())->portHolder(new PortBinding()))->toBeNull();
     });
 
     it('returns null when no container is running', function (): void {
         Process::fake(['*docker*ps*' => '']);
 
-        expect((new Docker())->portHolder())->toBeNull();
+        expect((new Docker())->portHolder(new PortBinding()))->toBeNull();
     });
 
     it('returns null when docker ps fails', function (): void {
         Process::fake(['*docker*ps*' => Process::result(output: "web\t0.0.0.0:80->80/tcp\n", exitCode: 1)]);
 
-        expect((new Docker())->portHolder())->toBeNull();
+        expect((new Docker())->portHolder(new PortBinding()))->toBeNull();
+    });
+
+    it('returns the container publishing a configured web port', function (): void {
+        Process::fake(['*docker*ps*' => "web\t0.0.0.0:80->80/tcp\nalt\t0.0.0.0:8443->443/tcp\n"]);
+
+        expect((new Docker())->portHolder(new PortBinding(http: 8080, https: 8443)))->toBe('alt');
+    });
+
+    it('returns a container publishing a web port on the router bind address or every address', function (string $ports): void {
+        Process::fake(['*docker*ps*' => "web\t{$ports}\n"]);
+
+        expect((new Docker())->portHolder(new PortBinding('127.0.0.2')))->toBe('web');
+    })->with([
+        'the bind address' => '127.0.0.2:443->443/tcp',
+        'every IPv4 address' => '0.0.0.0:443->443/tcp',
+        'every IPv6 address' => '[::]:443->443/tcp',
+        'every address in the old format' => ':::443->443/tcp',
+    ]);
+
+    it('returns null when the web ports are published on another address than the bind address', function (): void {
+        Process::fake(['*docker*ps*' => "web\t127.0.0.1:443->443/tcp, 127.0.0.1:80->80/tcp\n"]);
+
+        expect((new Docker())->portHolder(new PortBinding('127.0.0.2')))->toBeNull();
+    });
+});
+
+describe('containerLabel()', function (): void {
+    it('returns the value of the label', function (): void {
+        Process::fake(['*docker*inspect*' => "127.0.0.2:8080:8443\n"]);
+
+        expect((new Docker())->containerLabel('rift-router', 'dev.rift.binding'))->toBe('127.0.0.2:8080:8443');
+    });
+
+    it('asks docker inspect for the label', function (): void {
+        Process::fake(['*' => '']);
+
+        (new Docker())->containerLabel('rift-router', 'dev.rift.binding');
+
+        Process::assertRan(['docker', 'inspect', '--format', '{{index .Config.Labels "dev.rift.binding"}}', 'rift-router']);
+    });
+
+    it('returns null when the container has no such label', function (string $output): void {
+        Process::fake(['*docker*inspect*' => $output]);
+
+        expect((new Docker())->containerLabel('rift-router', 'dev.rift.binding'))->toBeNull();
+    })->with([
+        'an empty value' => "\n",
+        'a missing key' => "<no value>\n",
+    ]);
+
+    it('returns null when the container does not exist', function (): void {
+        Process::fake(['*docker*inspect*' => Process::result(output: 'x', exitCode: 1)]);
+
+        expect((new Docker())->containerLabel('rift-router', 'dev.rift.binding'))->toBeNull();
     });
 });
 

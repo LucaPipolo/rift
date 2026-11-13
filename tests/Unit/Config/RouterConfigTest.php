@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Config\PortBinding;
 use App\Config\RouterConfig;
 use App\Exceptions\ConfigException;
 
@@ -100,6 +101,40 @@ describe('load()', function (): void {
         'image',
         'admin',
     ])->throws(ConfigException::class, 'router `name`, `image`, and `admin` must be strings.');
+
+    it('reads the bind address and web ports from the file', function (): void {
+        expect(RouterConfig::load(routerConfigFile("router:\n  bind: 127.0.0.2\n  http: 8080\n  https: 8443\n")))
+            ->toEqual(new RouterConfig(binding: new PortBinding(address: '127.0.0.2', http: 8080, https: 8443)));
+    });
+
+    it('binds every address on ports 80 and 443 by default', function (): void {
+        expect(RouterConfig::load(routerConfigFile("router:\n  name: mine\n")))
+            ->binding->toEqual(new PortBinding(address: null, http: 80, https: 443));
+    });
+
+    it('reads a bind of 0.0.0.0 as every address', function (): void {
+        expect(RouterConfig::load(routerConfigFile("router:\n  bind: 0.0.0.0\n"))->binding->address)->toBeNull();
+    });
+
+    it('throws a ConfigException when `bind` is not an IPv4 address', function (string $bind): void {
+        RouterConfig::load(routerConfigFile("router:\n  bind: {$bind}\n"));
+    })->with([
+        'a hostname' => 'localhost',
+        'an IPv6 address' => '"::1"',
+        'a list' => '[127.0.0.2]',
+    ])->throws(ConfigException::class, 'router `bind` must be an IPv4 address.');
+
+    it('throws a ConfigException when a web port is not a valid port', function (string $setting, string $value): void {
+        RouterConfig::load(routerConfigFile("router:\n  {$setting}: {$value}\n"));
+    })->with([
+        'http as a string' => ['http', '"8080"'],
+        'https as zero' => ['https', '0'],
+        'https above 65535' => ['https', '65536'],
+    ])->throws(ConfigException::class, 'router `http` and `https` must be ports between 1 and 65535.');
+
+    it('throws a ConfigException when `http` and `https` are the same port', function (): void {
+        RouterConfig::load(routerConfigFile("router:\n  http: 8443\n  https: 8443\n"));
+    })->throws(ConfigException::class, 'router `http` and `https` must be different ports.');
 });
 
 describe('container()', function (): void {
@@ -149,5 +184,11 @@ describe('named()', function (): void {
         $router = new RouterConfig(image: 'caddy:2', admin: 'http://localhost:2020');
 
         expect($router->named('myapp-router'))->toEqual(new RouterConfig('myapp-router', 'caddy:2', 'http://localhost:2020'));
+    });
+
+    it('keeps the bind address and web ports for a pinned router', function (): void {
+        $router = new RouterConfig(binding: new PortBinding(address: '127.0.0.2', http: 8080, https: 8443));
+
+        expect($router->named('myapp-router')->binding)->toBe($router->binding);
     });
 });

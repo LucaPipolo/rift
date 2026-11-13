@@ -93,7 +93,7 @@ final readonly class Instance
      */
     public function urls(): array
     {
-        return array_map(fn (string $host) => 'https://' . $host, $this->hosts());
+        return array_map($this->origin(...), $this->hosts());
     }
 
     /**
@@ -103,7 +103,7 @@ final readonly class Instance
      */
     public function url(): string
     {
-        return 'https://' . $this->domain();
+        return $this->origin($this->domain());
     }
 
     /**
@@ -172,5 +172,19 @@ final readonly class Instance
     public function envPath(): string
     {
         return $this->checkout->root . '/.env';
+    }
+
+    /**
+     * Get the HTTPS origin of a hostname, with the router's port unless it is the default.
+     *
+     * @param  string  $host  The hostname.
+     *
+     * @return string The origin, such as https://myapp.test or https://myapp.test:8443.
+     */
+    private function origin(string $host): string
+    {
+        $https = $this->router->binding->https;
+
+        return 'https://' . $host . ($https === 443 ? '' : ':' . $https);
     }
 }

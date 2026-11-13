@@ -22,10 +22,11 @@ interface PortProbe
      * Get the name of the process listening on the port, if any.
      *
      * @param  int  $port  The host port.
+     * @param  string|null  $address  Only a listener on this exact address, or null for any.
      *
      * @return string|null The process name, or null when nothing listens or the listener is hidden.
      */
-    public function listener(int $port): ?string;
+    public function listener(int $port, ?string $address = null): ?string;
 
     /**
      * Get the host ports published by one Compose project's containers.

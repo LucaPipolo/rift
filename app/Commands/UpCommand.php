@@ -70,7 +70,7 @@ final class UpCommand extends RiftCommand
 
         // Stop before asking for a password if the router cannot start at all.
         if (($blocker = $router->blocker()) !== null) {
-            $this->reportPortConflict($blocker);
+            $this->reportPortConflict($blocker, $router->config->binding);
 
             return self::FAILURE;
         }

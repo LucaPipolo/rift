@@ -119,7 +119,7 @@ final class InitCommand extends RiftCommand
             service: $service,
             port: $port,
             ports: $ports,
-            env: $writeUrl ? ['APP_URL' => 'https://{domain}'] : [],
+            env: $writeUrl ? ['APP_URL' => '{url}'] : [],
             hooks: $preset === Preset::Sail
                 ? [HookStage::AfterUp->value => [['run' => 'composer run setup', 'label' => 'Running project setup']]]
                 : [],

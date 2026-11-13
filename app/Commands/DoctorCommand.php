@@ -167,7 +167,7 @@ final class DoctorCommand extends RiftCommand
                 "{$router->config->name} is running",
                 false,
                 $blocker !== null
-                    ? "{$blocker->name} is holding ports 80 and 443. Stop it, then run `rift router:start`."
+                    ? "{$blocker->name} is holding ports {$router->config->binding->describe()}. Stop it, then run `rift router:start`."
                     : 'Run `rift router:start`.',
             );
 
@@ -206,7 +206,7 @@ final class DoctorCommand extends RiftCommand
     }
 
     /**
-     * Check for other Caddy routers competing for ports 80 and 443, offering to remove them.
+     * Check for other Caddy routers competing for the router's web ports, offering to remove them.
      *
      * @param  Router  $router  The shared router.
      *
@@ -228,7 +228,7 @@ final class DoctorCommand extends RiftCommand
         $this->check(
             'No other routers running the router image',
             false,
-            'Found: ' . implode(', ', $orphans) . '. They will compete with the shared router for ports 80 and 443.',
+            'Found: ' . implode(', ', $orphans) . '. They will compete with the shared router for ports ' . $router->config->binding->describe() . '.',
         );
 
         if (! confirm('Remove them?', default: false)) {
