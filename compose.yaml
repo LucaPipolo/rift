@@ -26,7 +26,26 @@ services:
       HOME: /tmp
       BUN_INSTALL_CACHE_DIR: /tmp/.bun-cache
 
+  go:
+    build:
+      context: docker
+      dockerfile: go.Dockerfile
+    image: rift-go
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: /app/dash
+    volumes:
+      - .:/app
+      - go-cache:/tmp/go
+    environment:
+      HOME: /tmp
+      GOPATH: /tmp/go
+      GOCACHE: /tmp/go/cache
+      GOLANGCI_LINT_CACHE: /tmp/go/lint
+      GOFLAGS: -buildvcs=false
+      CGO_ENABLED: "0"
+
 volumes:
   composer-cache:
   micro-cache:
   bun-cache:
+  go-cache:

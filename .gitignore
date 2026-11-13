@@ -40,6 +40,8 @@ rector-cache
 
 # Coverage Reports
 /.coverage
+/dash/coverage.out
+/dash/coverage.html
 
 # ==========================================
 # Hosting & Serverless Platform Directories
