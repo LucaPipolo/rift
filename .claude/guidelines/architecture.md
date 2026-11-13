@@ -50,6 +50,20 @@ host goes through something tests can replace:
 A new host interaction follows one of these patterns, so no test ever reaches the real machine. `tests/Pest.php`
 enforces it for processes: a feature test that runs one with no matching fake fails instead.
 
+## rift dash
+
+`rift dash` (`DashCommand`) checks for a terminal, finds `rift-dash` (`Companion`: unpacked from the PHAR to
+`~/.cache/rift`, else beside the binary, in `builds/`, or on PATH) and hands the terminal to it, passing
+`RIFT_COMMAND`, the JSON command line that runs this same rift (`Rift`). Inside the native binary `PHP_BINARY` is
+empty; the micro runtime's `micro_get_self_filename()` gives the path instead.
+
+`rift-dash` keeps one `rift dash:watch` running, which prints a `SnapshotJson` line every two seconds and on a
+`refresh` line from its input. Everything Rift knows (states, domains, URLs, ports, .env sources, worktree paths
+through `rift dash:plan`) is worked out in PHP; Go only draws, reads keys and runs commands: rift itself for
+actions, `git` and `docker compose logs` for the logs and git tabs. `dash/testdata/snapshot.json` is the contract:
+`SnapshotJson` must produce it exactly and the Go decoder is tested against it. Bump `SnapshotJson::VERSION` (and Go's
+`snapshot.Version`) when a field is renamed or removed.
+
 ## Errors
 
 `app/Exceptions/` holds the errors a user can act on: `ConfigException` (fix `rift.yaml`, `.env` or the checkout),

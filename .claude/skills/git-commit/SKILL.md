@@ -103,12 +103,14 @@ Model: Opus (claude-opus-5-5)
 
 ```
 Co-Authored-By: Claude Code <noreply@anthropic.com>
-Model: <this session's model short name> (<this session's model id>)
+Model: <short name of the model that did the work> (<its model id>)
 ```
 
-`Co-Authored-By` always names the harness, `Claude Code`, not the model tier. The `Model` placeholder comes from
-the session actually running this commit, e.g. `Opus (claude-opus-5-5)`, never a stale or guessed value, and
-never copied from an example in this file. Don't add a reasoning-effort or token-usage field: neither is
+`Co-Authored-By` always names the harness, `Claude Code`, not the model tier. The `Model` line credits the model
+that made the change, which is the caller, not this skill: it runs on a smaller model only to word the message, so
+its own model never goes in the trailer. The caller passes its model in the arguments, such as
+`Model: Opus (claude-opus-5-5)`; if none was passed, stop and ask for it rather than guessing, and never copy one
+from an example in this file. Don't add a reasoning-effort or token-usage field: neither is
 reliably available to this skill, and a fabricated or session-cumulative number would misrepresent the commit.
 Skip both trailer lines on a `git commit --fixup=<sha>` commit: its message is auto-derived from the target
 commit's subject and gets squashed away later, so there's nothing to attribute.
@@ -123,7 +125,7 @@ printf 'feat: add trust command\n\nCo-Authored-By: Claude Code <noreply@anthropi
   | docker compose --progress quiet run --rm -T --user "$(id -u):$(id -g)" bun bunx --bun commitlint
 ```
 
-Substitute this session's actual model short name and id for the `Model` placeholder. Run this with the actual
+Substitute the model the caller passed for the `Model` placeholder. Run this with the actual
 message you drafted, trailer included: `footer-leading-blank` requires the blank line before it, and
 `footer-max-line-length` caps each trailer line at 100 characters, which is why the tool and the model are on
 separate lines rather than crammed into one. If it's rejected, fix the message and check again rather than
@@ -140,7 +142,7 @@ git commit -m "the subject" -m "the body, if there is one" -m "Refs #N, if there
 Model: <model short name> (<model id>)"
 ```
 
-Substitute this session's actual model short name and id for the `Model` placeholder. Each `-m` becomes its own
+Substitute the model the caller passed for the `Model` placeholder. Each `-m` becomes its own
 paragraph, separated by a blank line, so the trailer stays a distinct footer block regardless of whether there's a
 body. Omit the trailer entirely on a `--fixup` commit (step 4).
 
