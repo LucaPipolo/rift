@@ -120,6 +120,8 @@ Exactly this template. Never add a section beyond these two:
 
 1. {a concrete, specific step a reviewer would take to confirm the change works}
 2. ...
+
+{Closes #N or Refs #N, when the branch works toward an issue}
 ```
 
 - **Context** bullets describe what was added or changed, not why: "Adds a `Network` contract and its
@@ -129,10 +131,13 @@ Exactly this template. Never add a section beyond these two:
   first bullet names the PR it is stacked on: "Builds on #4, which must be merged first."
 - **Verification Plan** steps are concrete and actionable, phrased as instructions with the exact command and the
   output to expect: "Run `make build`, then run `builds/rift doctor` in a project whose domain doesn't resolve, and
-  confirm it prints `✗ myapp.test resolves to 127.0.0.1` with the fix underneath." Cover each command the change
+  confirm it prints `✗ myapp.test resolves to this machine` with the fix underneath." Cover each command the change
   touches, both the main checkout and a worktree when the change is per-checkout, macOS and Linux when it touches
   the trust store, DNS or networking, and any edge case the diff suggests (Docker not running, a port already taken,
   a missing or invalid `rift.yaml` key). Don't list `make test` or the CI checks; CI already runs them.
+- The issue reference ends the body on its own line: `Closes #N` when merging the PR completes the issue, `Refs #N`
+  when it only works toward it. In a stack, only the last PR closes the issue, so merging an earlier one can't close
+  it too soon. Never link the issue from the PR's Development sidebar instead: that closes it on merge like `Closes`.
 
 ## 7. Open it
 

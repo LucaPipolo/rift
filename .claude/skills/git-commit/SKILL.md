@@ -87,6 +87,18 @@ Default to no body. Add one only when the reason behind the change is genuinely 
 the subject line, such as a workaround for a specific Docker, Caddy or macOS behaviour. Never add a body that just
 restates what the diff already shows.
 
+When the commit works toward a GitHub issue, reference it: `Refs #N`, or `Closes #N` on the commit that completes
+it. The reference is its own paragraph, after the body when there is one and before the trailer:
+
+```
+feat: stop router start when the bind address is missing
+
+Closes #2
+
+Co-Authored-By: Claude Code <noreply@anthropic.com>
+Model: Opus (claude-opus-5-5)
+```
+
 **Always add a trailer identifying the tool and model**, regardless of whether the commit has a body otherwise:
 
 ```
@@ -123,7 +135,7 @@ the hook would refuse the commit for the same reason.
 ## 6. Commit
 
 ```bash
-git commit -m "the subject" -m "the body, if there is one" \
+git commit -m "the subject" -m "the body, if there is one" -m "Refs #N, if there is one" \
   -m "Co-Authored-By: Claude Code <noreply@anthropic.com>
 Model: <model short name> (<model id>)"
 ```
