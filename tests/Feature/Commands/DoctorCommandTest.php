@@ -211,6 +211,14 @@ describe('when the router is not running', function (): void {
         );
     });
 
+    it('names a host process holding ports 80 and 443', function (): void {
+        doctorPassingMachine(['*lsof*' => "p123\ncnginx\n", '*docker*ps*' => '']);
+
+        artisan('doctor')->expectsOutputToContain(
+            'nginx is holding ports 80 and 443. Stop it, then run `rift router:start`.',
+        );
+    });
+
     it('skips the admin API check', function (): void {
         doctorPassingMachine(['*docker*ps*' => '']);
 

@@ -28,6 +28,29 @@ final class SystemPortProbe implements PortProbe
     }
 
     /**
+     * Get the name of the process listening on the port, if any.
+     *
+     * lsof only sees what it can: without root it misses other users' processes,
+     * such as a web server running as root, and when it is not installed it finds
+     * nothing, leaving Docker's own "port is already allocated" error.
+     *
+     * @param  int  $port  The host port.
+     *
+     * @return string|null The process name, or null when nothing listens or the listener is hidden.
+     */
+    public function listener(int $port): ?string
+    {
+        $result = Process::run(['lsof', '-nP', '-iTCP:' . $port, '-sTCP:LISTEN', '-Fc']);
+
+        // With -Fc each process is a "p<pid>" line followed by a "c<command>" line.
+        if (! $result->successful() || ! preg_match('/^c(.+)$/m', $result->output(), $match)) {
+            return null;
+        }
+
+        return $match[1];
+    }
+
+    /**
      * Get the host ports published by one Compose project's containers, once per run.
      *
      * @param  string  $composeProject  The Compose project name.

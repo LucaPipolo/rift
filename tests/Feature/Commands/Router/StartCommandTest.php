@@ -157,6 +157,31 @@ describe('when another container holds ports 80 and 443', function (): void {
     });
 });
 
+describe('when a host process holds ports 80 and 443', function (): void {
+    beforeEach(function (): void {
+        host(project(), ['*lsof*' => "p123\ncnginx\n", '*docker*ps*' => '']);
+        caddy([]);
+    });
+
+    it('names the process holding the ports', function (): void {
+        artisan('router:start')->expectsOutputToContain('nginx already holds ports 80 and 443,');
+    });
+
+    it('does not suggest docker stop for a host process', function (): void {
+        artisan('router:start')->doesntExpectOutputToContain('docker stop');
+    });
+
+    it('does not create the router container', function (): void {
+        artisan('router:start')->run();
+
+        Process::assertNotRan(fn (PendingProcess $process): bool => ($process->command[1] ?? null) === 'run');
+    });
+
+    it('exits with failure', function (): void {
+        artisan('router:start')->assertExitCode(1);
+    });
+});
+
 describe('when the router container fails to start', function (): void {
     beforeEach(function (): void {
         host(project(), ['*docker*ps*' => '', "*docker*'run'*" => Process::result(exitCode: 1)]);

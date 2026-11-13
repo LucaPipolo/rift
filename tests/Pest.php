@@ -73,6 +73,18 @@ function probe(array $listening = [], array $published = []): PortProbe
         }
 
         /**
+         * Get a fixed process name for a port in the listening list.
+         *
+         * @param  int  $port  The host port.
+         *
+         * @return string|null The process name, or null when the port is not listed.
+         */
+        public function listener(int $port): ?string
+        {
+            return $this->isListening($port) ? 'node' : null;
+        }
+
+        /**
          * Get the fixed list of published ports.
          *
          * @param  string  $composeProject  The Compose project name, ignored.

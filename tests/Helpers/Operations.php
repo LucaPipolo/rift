@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Config\RouterConfig;
+use App\Contracts\PortProbe;
 use App\Docker\Docker;
 use App\Router\CaddyAdmin;
 use App\Router\CertificateAuthority;
@@ -66,6 +67,7 @@ function routerWithScratchTrustStore(): string
         new CaddyAdmin($config),
         $docker,
         new CertificateAuthority($config, $docker, 'Linux', $directory),
+        app(PortProbe::class),
     ));
 
     return $directory;

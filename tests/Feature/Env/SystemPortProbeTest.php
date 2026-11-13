@@ -28,6 +28,34 @@ describe('isListening()', function (): void {
     });
 });
 
+describe('listener()', function (): void {
+    it('returns the name of the process listening on the port', function (): void {
+        Process::fake(['*lsof*' => Process::result("p123\ncnginx\n")]);
+
+        expect(new SystemPortProbe()->listener(443))->toBe('nginx');
+    });
+
+    it('returns null when lsof finds no listener on the port', function (): void {
+        Process::fake(['*lsof*' => Process::result('', '', 1)]);
+
+        expect(new SystemPortProbe()->listener(443))->toBeNull();
+    });
+
+    it('returns null when lsof names no process', function (): void {
+        Process::fake(['*lsof*' => Process::result('')]);
+
+        expect(new SystemPortProbe()->listener(443))->toBeNull();
+    });
+
+    it('asks lsof for the command of TCP listeners on the port', function (): void {
+        Process::fake(['*lsof*' => Process::result('', '', 1)]);
+
+        new SystemPortProbe()->listener(443);
+
+        Process::assertRan(['lsof', '-nP', '-iTCP:443', '-sTCP:LISTEN', '-Fc']);
+    });
+});
+
 describe('publishedBy()', function (): void {
     it('returns the host ports the project containers publish', function (): void {
         Process::fake(['*docker*' => Process::result(
