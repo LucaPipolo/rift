@@ -12,12 +12,16 @@ concurrency:
 
 permissions:
   contents: read
-  actions: read
-  pull-requests: write
 
 jobs:
   tests:
+    name: tests
     runs-on: ubuntu-latest
+    # Reads the base branch's coverage and comments how it changed on the pull request.
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v6
@@ -26,24 +30,51 @@ jobs:
         with:
           php-version: '8.5'
           coverage: xdebug
-          ini-values: phar.readonly=0
+          ini-values: phar.readonly=0, memory_limit=512M
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: dash/go.mod
+          cache-dependency-path: dash/go.sum
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
       # --ci runs the whole suite: TIA is for local runs only.
-      - name: Run tests with coverage
+      - name: Run PHP tests with coverage
         run: vendor/bin/pest --ci --coverage --min=100 --coverage-clover clover.xml --coverage-html coverage-html
         env:
           XDEBUG_MODE: coverage
 
+      # Every check runs even when an earlier one failed, so one run reports them all.
+      - name: Check PHP type coverage
+        if: ${{ !cancelled() }}
+        run: vendor/bin/pest --type-coverage --min=100
+        env:
+          XDEBUG_MODE: 'off'
+
+      - name: Run Go tests with coverage
+        if: ${{ !cancelled() }}
+        working-directory: dash
+        run: sh scripts/coverage.sh
+
+      # The race detector needs cgo, which the Alpine development image leaves out, so only CI runs it.
+      - name: Run Go tests with the race detector
+        if: ${{ !cancelled() }}
+        working-directory: dash
+        run: go test -race ./...
+        env:
+          CGO_ENABLED: '1'
+
       # Uploaded even when coverage drops below 100%, to show what is missing.
-      - name: Upload HTML coverage report
+      - name: Upload HTML coverage reports
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
           name: coverage-html
-          path: coverage-html
+          path: |
+            coverage-html
+            dash/coverage.html
           if-no-files-found: ignore
 
       - name: Download base coverage

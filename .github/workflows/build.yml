@@ -1,0 +1,55 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          ini-values: phar.readonly=0
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: dash/go.mod
+          cache-dependency-path: dash/go.sum
+
+      # The same steps as the release workflow, so a change that breaks a release binary fails here first.
+      - name: Build the binaries
+        run: |
+          sh docker/build-dash.sh darwin-arm64 darwin-x86_64 linux-arm64 linux-x86_64
+          bash docker/build.sh darwin-arm64 darwin-x86_64 linux-arm64 linux-x86_64
+
+      # The Linux runner can start its own binary, which proves the PHAR boots in the static runtime.
+      - name: Run the Linux binary
+        run: builds/rift-linux-x86_64 --version
+
+      # The binary must unpack the rift-dash it carries and draw with it. A stand-in docker answers
+      # for the runner's, and timeout runs in the foreground so the dashboard may take the terminal.
+      - name: Open rift dash with the Linux binary
+        run: |
+          mkdir -p "$RUNNER_TEMP/bin" "$RUNNER_TEMP/home"
+          printf '#!/bin/sh\nexit 0\n' > "$RUNNER_TEMP/bin/docker"
+          chmod +x "$RUNNER_TEMP/bin/docker"
+          cd "$RUNNER_TEMP/home"
+          sleep 15 | env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" XDG_CACHE_HOME="$PWD/.cache" PATH="$RUNNER_TEMP/bin:$PATH" TERM=xterm-256color \
+            script -qfec "stty cols 140 rows 40; timeout --foreground -s INT 8 $GITHUB_WORKSPACE/builds/rift-linux-x86_64 dash" screen.log > /dev/null || true
+          ls .cache/rift/rift-dash-*
+          grep -q 'Command log' screen.log
