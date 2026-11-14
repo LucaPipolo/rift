@@ -9,7 +9,8 @@ Set FontSize 15
 Set Width 1440
 Set Height 840
 Set Padding 16
-Set Theme "Catppuccin Mocha"
+# The docs site's dark palette: ink, with tangerine as rift-dash's cyan accent.
+Set Theme {"name":"Rift","background":"#1c1c1a","foreground":"#e5e5e2","cursor":"#ef6433","selection":"#41413e","black":"#1c1c1a","red":"#e8394a","green":"#c6f96e","yellow":"#fcea5d","blue":"#f4b052","magenta":"#f08bad","cyan":"#ef6433","white":"#cfcfcb","brightBlack":"#575753","brightRed":"#f06a77","brightGreen":"#d8fb9b","brightYellow":"#fdf08d","brightBlue":"#f7c47f","brightMagenta":"#f5abc4","brightCyan":"#f48a62","brightWhite":"#ffffff"}
 Set TypingSpeed 120ms
 Set Framerate 20
 
