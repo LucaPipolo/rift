@@ -45,7 +45,8 @@ for.
 | `make bun …`             | Bun, for the commit tooling only.                                      |
 | `make docs:install`      | The docs site's dependencies, in `docs/`. Run once before the other `docs:*` targets. |
 | `make docs:dev`          | Serve the docs site with live reload at `http://localhost:3000`.       |
-| `make docs:build`        | Build the static docs site into `docs/out`.                            |
+| `make docs:build`        | Build the docs site into `docs/out`, and its Vercel output, with a CSP per page, into `docs/.vercel/output`. |
+| `make docs:preview`      | Serve that output with its production headers at `http://localhost:3001`. |
 | `make docs:lint`         | ESLint and Prettier on the docs site. `make docs:format` fixes formatting. |
 | `make docs:bun`          | Bun in `docs/`, through `ARGS`: `make docs:bun ARGS="outdated"`.        |
 | `make demo`              | Record `.github/dash.gif`, the README demo, with VHS against a fake rift. |
