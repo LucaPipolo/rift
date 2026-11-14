@@ -1,0 +1,6 @@
+Contact: mailto:dev@lucapipolo.com
+Contact: https://github.com/LucaPipolo/rift/security/advisories/new
+Expires: 2027-11-13T00:00:00.000Z
+Preferred-Languages: en, it, es
+Canonical: https://getrift.sh/.well-known/security.txt
+Policy: https://getrift.sh/security

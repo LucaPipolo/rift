@@ -15,6 +15,16 @@ export function DocLink({
   title?: string
   children: React.ReactNode
 }) {
+  // An email address opens the mail client: neither a page of this site nor a
+  // website to open in a new tab.
+  if (href.startsWith('mailto:')) {
+    return (
+      <a href={href} title={title}>
+        {children}
+      </a>
+    )
+  }
+
   if (isExternal(href)) {
     return (
       <a href={href} title={title} target="_blank" rel="noopener noreferrer">

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
 
 import { Hero } from '@/components/Hero'
+import { Footer } from '@/components/Footer'
 import { Glyph } from '@/components/Glyph'
 import { Logo, Logomark } from '@/components/Logo'
 import { MobileNavigation } from '@/components/MobileNavigation'
@@ -83,6 +84,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
         {children}
       </div>
+
+      <Footer />
     </div>
   )
 }

@@ -60,6 +60,7 @@ docs/
 ├── src/lib/navigation.ts      the sidebar
 ├── src/markdoc/tags.js        the tags pages can use, such as callout
 ├── src/components/            the layout, header, search and other components
+├── src/app/<legal>/           the legal notice, privacy, cookies, security and AI content pages
 ├── scripts/copy-assets.mjs    copies the dashboard demo from .github/
 ├── scripts/vercel-output.mjs  writes the Vercel output, with a security policy per page
 ├── scripts/preview.mjs        serves that output locally, headers and all
