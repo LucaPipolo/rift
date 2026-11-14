@@ -365,47 +365,51 @@ function SearchDialog({
       <Suspense fallback={null}>
         <CloseOnNavigation close={close} autocomplete={autocomplete} />
       </Suspense>
-      <Dialog
-        open={open}
-        onClose={() => close(autocomplete)}
-        className={clsx('fixed inset-0 z-50', className)}
-      >
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" />
+      {/* Rendered only while open: a closed Headless UI Dialog still renders a
+          hidden span with an inline style, which the site's CSP blocks. */}
+      {open && (
+        <Dialog
+          open={open}
+          onClose={() => close(autocomplete)}
+          className={clsx('fixed inset-0 z-50', className)}
+        >
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" />
 
-        <div className="fixed inset-0 overflow-y-auto px-4 py-4 sm:px-6 sm:py-20 md:py-32 lg:px-8 lg:py-[15vh]">
-          <DialogPanel className="mx-auto transform-gpu overflow-hidden rounded-xl bg-white shadow-xl sm:max-w-xl dark:bg-slate-800 dark:ring-1 dark:ring-slate-700">
-            <div {...autocomplete.getRootProps({})}>
-              <form
-                ref={formRef}
-                {...autocomplete.getFormProps({
-                  // eslint-disable-next-line react-hooks/refs
-                  inputElement: inputRef.current,
-                })}
-              >
-                <SearchInput
-                  ref={inputRef}
-                  autocomplete={autocomplete}
-                  autocompleteState={autocompleteState}
-                  onClose={() => setOpen(false)}
-                />
-                <div
-                  ref={panelRef}
-                  className="border-t border-slate-200 bg-white px-2 py-3 empty:hidden dark:border-slate-400/10 dark:bg-slate-800"
-                  {...autocomplete.getPanelProps({})}
+          <div className="fixed inset-0 overflow-y-auto px-4 py-4 sm:px-6 sm:py-20 md:py-32 lg:px-8 lg:py-[15vh]">
+            <DialogPanel className="mx-auto transform-gpu overflow-hidden rounded-xl bg-white shadow-xl sm:max-w-xl dark:bg-slate-800 dark:ring-1 dark:ring-slate-700">
+              <div {...autocomplete.getRootProps({})}>
+                <form
+                  ref={formRef}
+                  {...autocomplete.getFormProps({
+                    // eslint-disable-next-line react-hooks/refs
+                    inputElement: inputRef.current,
+                  })}
                 >
-                  {autocompleteState.isOpen && (
-                    <SearchResults
-                      autocomplete={autocomplete}
-                      query={autocompleteState.query}
-                      collection={autocompleteState.collections[0]}
-                    />
-                  )}
-                </div>
-              </form>
-            </div>
-          </DialogPanel>
-        </div>
-      </Dialog>
+                  <SearchInput
+                    ref={inputRef}
+                    autocomplete={autocomplete}
+                    autocompleteState={autocompleteState}
+                    onClose={() => setOpen(false)}
+                  />
+                  <div
+                    ref={panelRef}
+                    className="border-t border-slate-200 bg-white px-2 py-3 empty:hidden dark:border-slate-400/10 dark:bg-slate-800"
+                    {...autocomplete.getPanelProps({})}
+                  >
+                    {autocompleteState.isOpen && (
+                      <SearchResults
+                        autocomplete={autocomplete}
+                        query={autocompleteState.query}
+                        collection={autocompleteState.collections[0]}
+                      />
+                    )}
+                  </div>
+                </form>
+              </div>
+            </DialogPanel>
+          </div>
+        </Dialog>
+      )}
     </>
   )
 }

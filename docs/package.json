@@ -7,6 +7,8 @@
     "dev": "next dev --webpack",
     "prebuild": "bun scripts/copy-assets.mjs",
     "build": "next build --webpack",
+    "postbuild": "bun scripts/vercel-output.mjs",
+    "preview": "bun scripts/preview.mjs",
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
