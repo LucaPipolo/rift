@@ -1,4 +1,5 @@
 import { type Metadata } from 'next'
+import { Analytics } from '@vercel/analytics/next'
 import { Inter, Space_Grotesk } from 'next/font/google'
 import clsx from 'clsx'
 
@@ -48,6 +49,7 @@ export default function RootLayout({
         <Providers>
           <Layout>{children}</Layout>
         </Providers>
+        <Analytics />
       </body>
     </html>
   )
