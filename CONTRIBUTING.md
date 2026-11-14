@@ -3,6 +3,9 @@
 Everything you need to work on Rift runs in containers, so you only need
 [Docker] and [GNU Make] on your machine: no [PHP], [Composer], [Go] or [Bun].
 
+This guide is also published, with search, at [getrift.sh][contributing guide],
+next to the documentation for using Rift.
+
 ## How Rift is built
 
 Rift is two programs that ship as one binary.
@@ -535,6 +538,7 @@ not open a public issue. For anything else, [open an issue][issues] with:
 [commitlint]: https://commitlint.js.org/
 [Composer]: https://getcomposer.org/
 [Context7]: https://context7.com/
+[contributing guide]: https://getrift.sh/docs/contributing
 [Conventional Commits]: https://www.conventionalcommits.org/
 [Docker]: https://www.docker.com/
 [GitHub CLI]: https://cli.github.com/

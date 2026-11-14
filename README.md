@@ -24,6 +24,8 @@ Let multiple AI agents work on different features or versions of your project in
 parallel, with a running app for each one that you can open and review, and
 watch them all from one dashboard.
 
+The full documentation, with every command and option, is at [getrift.sh][docs].
+
 ![rift dash showing every copy of two projects][demo]
 
 ## Why use Rift?
@@ -480,17 +482,20 @@ subprocess output goes to a log whose path is printed when a step fails.
   Rift's router, or move the router to other ports or an address of its own,
   as Configuration and advanced usage describes.
 
-Still stuck? [Open an issue](https://github.com/LucaPipolo/rift/issues).
+Still stuck? Search the [documentation][docs], or
+[open an issue](https://github.com/LucaPipolo/rift/issues).
 
 ## Contributing
 
-For development setup and contribution guidelines, see
-[CONTRIBUTING.md](CONTRIBUTING.md).
+For development setup and contribution guidelines, see the [contributing guide]
+on getrift.sh, or [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Licence
 
 Rift is open source under the [MIT licence][licence].
 
+[docs]: https://getrift.sh
+[contributing guide]: https://getrift.sh/docs/contributing
 [Docker Compose]: https://docs.docker.com/compose/
 [licence]: LICENSE
 [Laravel Sail]: https://laravel.com/docs/sail
