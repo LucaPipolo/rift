@@ -106,16 +106,17 @@ export function Hero() {
         <div className="mx-auto grid max-w-2xl grid-cols-1 items-center gap-x-8 gap-y-16 px-4 lg:max-w-8xl lg:grid-cols-2 lg:px-8 xl:gap-x-16 xl:px-12">
           <div className="relative z-10 md:text-center lg:text-left">
             <p className="inline-block border-2 border-ink bg-white px-2 py-0.5 font-display text-xs font-semibold tracking-wider text-ink uppercase">
-              For Docker Compose and Laravel Sail
+              Made for parallel AI agents
             </p>
             <h1 className="mt-6 font-display text-5xl font-bold tracking-tight text-ink sm:text-6xl">
-              Every worktree, side by side.
+              Every agent gets its own running app.
             </h1>
             <p className="mt-6 text-xl text-ink/80">
-              Run each Git worktree of your project at once, with its own
-              containers, ports and local HTTPS address.
+              Give each AI agent a Git worktree and Rift runs it as a separate
+              copy of your app, with its own containers, ports and HTTPS
+              address. Review their work side by side.
             </p>
-            <div className="mt-8 flex gap-4 md:justify-center lg:justify-start">
+            <div className="mt-8 flex flex-wrap gap-4 md:justify-center lg:justify-start">
               <Button href="/docs/quick-start">Get started</Button>
               <Button
                 href="https://github.com/LucaPipolo/rift"

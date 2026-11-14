@@ -6,7 +6,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { Dialog, DialogPanel } from '@headlessui/react'
 
 import { Glyph } from '@/components/Glyph'
-import { Logomark } from '@/components/Logo'
+import { Logo } from '@/components/Logo'
 import { Navigation } from '@/components/Navigation'
 
 function CloseOnNavigation({ close }: { close: () => void }) {
@@ -47,28 +47,32 @@ export function MobileNavigation() {
       <Suspense fallback={null}>
         <CloseOnNavigation close={close} />
       </Suspense>
-      <Dialog
-        open={isOpen}
-        onClose={() => close()}
-        className="fixed inset-0 z-50 flex items-start overflow-y-auto bg-slate-900/50 pr-10 backdrop-blur-sm lg:hidden"
-        aria-label="Navigation"
-      >
-        <DialogPanel className="min-h-full w-full max-w-xs bg-white px-4 pt-5 pb-12 sm:px-6 dark:bg-slate-900">
-          <div className="flex items-center">
-            <button
-              type="button"
-              onClick={() => close()}
-              aria-label="Close navigation"
-            >
-              <Glyph name="close" className="h-8 w-8" />
-            </button>
-            <Link href="/" className="ml-6" aria-label="Home page">
-              <Logomark className="h-9 w-9" />
-            </Link>
-          </div>
-          <Navigation className="mt-5 px-1" onLinkClick={onLinkClick} />
-        </DialogPanel>
-      </Dialog>
+      {/* Rendered only while open: a closed Headless UI Dialog still renders a
+          hidden span with an inline style, which the site's CSP blocks. */}
+      {isOpen && (
+        <Dialog
+          open={isOpen}
+          onClose={() => close()}
+          className="fixed inset-0 z-50 flex items-start overflow-y-auto bg-slate-900/50 pr-10 backdrop-blur-sm lg:hidden"
+          aria-label="Navigation"
+        >
+          <DialogPanel className="min-h-full w-full max-w-xs bg-white px-4 pt-5 pb-12 sm:px-6 dark:bg-slate-900">
+            <div className="flex items-center">
+              <button
+                type="button"
+                onClick={() => close()}
+                aria-label="Close navigation"
+              >
+                <Glyph name="close" className="h-8 w-8" />
+              </button>
+              <Link href="/" className="ml-6" aria-label="Home page">
+                <Logo />
+              </Link>
+            </div>
+            <Navigation className="mt-5 px-1" onLinkClick={onLinkClick} />
+          </DialogPanel>
+        </Dialog>
+      )}
     </>
   )
 }

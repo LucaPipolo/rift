@@ -3,6 +3,9 @@
 Everything you need to work on Rift runs in containers, so you only need
 [Docker] and [GNU Make] on your machine: no [PHP], [Composer], [Go] or [Bun].
 
+This guide is also published, with search, at [getrift.sh][contributing guide],
+next to the documentation for using Rift.
+
 ## How Rift is built
 
 Rift is two programs that ship as one binary.
@@ -77,7 +80,8 @@ Run `make` on its own to list every target.
 | `make go …`             | Run Go in `dash/`. See below.                                                 |
 | `make docs:install`     | Install the docs site's dependencies in `docs/`.                              |
 | `make docs:dev`         | Serve the docs site with live reload at `http://localhost:3000`.              |
-| `make docs:build`       | Build the static docs site into `docs/out`.                                   |
+| `make docs:build`       | Build the static docs site, and its Vercel output with security headers.      |
+| `make docs:preview`     | Serve the built site with its production headers at `http://localhost:3001`.  |
 | `make docs:lint`        | Check the docs site with ESLint and Prettier. `make docs:format` fixes it.    |
 | `make docs:bun`         | Run Bun in `docs/`, through `ARGS`: `make docs:bun ARGS="outdated"`.          |
 
@@ -535,6 +539,7 @@ not open a public issue. For anything else, [open an issue][issues] with:
 [commitlint]: https://commitlint.js.org/
 [Composer]: https://getcomposer.org/
 [Context7]: https://context7.com/
+[contributing guide]: https://getrift.sh/docs/contributing
 [Conventional Commits]: https://www.conventionalcommits.org/
 [Docker]: https://www.docker.com/
 [GitHub CLI]: https://cli.github.com/

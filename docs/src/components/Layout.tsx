@@ -6,8 +6,9 @@ import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
 
 import { Hero } from '@/components/Hero'
+import { Footer } from '@/components/Footer'
 import { Glyph } from '@/components/Glyph'
-import { Logo, Logomark } from '@/components/Logo'
+import { Logo } from '@/components/Logo'
 import { MobileNavigation } from '@/components/MobileNavigation'
 import { Navigation } from '@/components/Navigation'
 import { Search } from '@/components/Search'
@@ -39,8 +40,7 @@ function Header() {
       </div>
       <div className="relative flex grow basis-0 items-center">
         <Link href="/" aria-label="Home page">
-          <Logomark className="h-9 w-9 lg:hidden" />
-          <Logo className="hidden lg:block" />
+          <Logo />
         </Link>
       </div>
       <div className="-my-5 mr-6 sm:mr-8 md:mr-0">
@@ -83,6 +83,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
         {children}
       </div>
+
+      <Footer />
     </div>
   )
 }

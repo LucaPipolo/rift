@@ -55,12 +55,16 @@ of HTML files, with no server.
 
 ```text
 docs/
-├── src/app/page.md          the introduction, at /
-├── src/app/docs/<slug>/     one page.md per page, at /docs/<slug>
-├── src/lib/navigation.ts    the sidebar
-├── src/markdoc/tags.js      the tags pages can use, such as callout
-├── src/components/          the layout, header, search and other components
-└── scripts/copy-assets.mjs  copies the dashboard demo from .github/
+├── src/app/page.md            the introduction, at /
+├── src/app/docs/<slug>/       one page.md per page, at /docs/<slug>
+├── src/lib/navigation.ts      the sidebar
+├── src/markdoc/tags.js        the tags pages can use, such as callout
+├── src/components/            the layout, header, search and other components
+├── src/app/<legal>/           the legal notice, privacy, cookies, security and AI content pages
+├── scripts/copy-assets.mjs    copies the dashboard demo from .github/
+├── scripts/vercel-output.mjs  writes the Vercel output, with a security policy per page
+├── scripts/preview.mjs        serves that output locally, headers and all
+└── vercel.json                the Vercel project settings
 ```
 
 ### Add or change a page
@@ -80,7 +84,8 @@ docs/
 
 2. Add it to the sidebar in `docs/src/lib/navigation.ts`.
 3. Preview it with `make docs:dev`, then check it with `make docs:build` and
-   `make docs:lint`.
+   `make docs:lint`. `make docs:preview` serves the built site with the same
+   headers Vercel sends, to check it under its Content Security Policy.
 
 Search indexes every page at build time, so a new page needs nothing else.
 

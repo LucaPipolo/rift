@@ -20,7 +20,11 @@ export function Button({
   className,
   ...props
 }: ButtonProps) {
-  className = clsx(variantStyles[variant], className)
+  className = clsx(
+    'inline-flex items-center whitespace-nowrap',
+    variantStyles[variant],
+    className,
+  )
 
   return typeof props.href === 'undefined' ? (
     <button className={className} {...props} />

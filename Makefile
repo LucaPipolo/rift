@@ -36,7 +36,7 @@ $(TOOL_ARGS): $(TOOL)
 endif
 
 else
-.PHONY: help image test test\:php test\:go test\:types test\:coverage sniff lint format shell rift build demo docs\:install docs\:dev docs\:build docs\:lint docs\:format docs\:bun checksums clean
+.PHONY: help image test test\:php test\:go test\:types test\:coverage sniff lint format shell rift build demo docs\:install docs\:dev docs\:build docs\:preview docs\:lint docs\:format docs\:bun checksums clean
 
 help: ## List the available targets
 	@grep -E '^[a-z\\:-]+:.*## ' $(MAKEFILE_LIST) | awk -F ': ## ' '{gsub(/\\/, "", $$1); printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -97,8 +97,11 @@ docs\:install: ## Install the docs site's dependencies in docs/
 docs\:dev: ## Serve the docs site with live reload at http://localhost:3000
 	docker compose run --rm -p 3000:3000 -w /app/docs bun bun run dev
 
-docs\:build: ## Build the static docs site into docs/out
+docs\:build: ## Build the static docs site into docs/out, and its Vercel output with headers into docs/.vercel/output
 	$(DOCS) bun run build
+
+docs\:preview: ## Serve the built docs site with its production headers at http://localhost:3001
+	docker compose run --rm -p 3001:3000 -w /app/docs bun bun run preview
 
 docs\:lint: ## Check the docs site with ESLint and Prettier
 	$(DOCS) bun run lint

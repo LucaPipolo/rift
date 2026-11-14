@@ -3,6 +3,8 @@ import Link from 'next/link'
 export default function NotFound() {
   return (
     <div className="max-w-2xl min-w-0 flex-auto px-4 py-16 lg:max-w-none lg:pr-0 lg:pl-8 xl:px-16">
+      <title>Page not found - Rift</title>
+      <meta name="robots" content="noindex" />
       <div className="flex h-full flex-col items-center justify-center text-center">
         <p className="font-display text-sm font-medium text-slate-900 dark:text-white">
           404

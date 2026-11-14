@@ -1,4 +1,5 @@
 import { type Metadata } from 'next'
+import { Analytics } from '@vercel/analytics/next'
 import { Inter, Space_Grotesk } from 'next/font/google'
 import clsx from 'clsx'
 
@@ -21,12 +22,7 @@ const spaceGrotesk = Space_Grotesk({
 })
 
 export const metadata: Metadata = {
-  title: {
-    template: '%s - Rift',
-    default: 'Rift - Every worktree, side by side',
-  },
-  description:
-    'Run every Git worktree of a Docker Compose or Laravel Sail project side by side, each with its own local HTTPS address.',
+  metadataBase: new URL('https://getrift.sh'),
 }
 
 export default function RootLayout({
@@ -48,6 +44,7 @@ export default function RootLayout({
         <Providers>
           <Layout>{children}</Layout>
         </Providers>
+        <Analytics />
       </body>
     </html>
   )
