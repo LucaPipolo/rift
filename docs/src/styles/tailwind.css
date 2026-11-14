@@ -1,0 +1,93 @@
+@import 'tailwindcss';
+@import './prism.css';
+
+@plugin '@tailwindcss/typography';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --text-*: initial;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.5rem;
+  --text-base: 1rem;
+  --text-base--line-height: 2rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 2rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2.5rem;
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 2.5rem;
+  --text-4xl: 2.5rem;
+  --text-4xl--line-height: 3rem;
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 3.5rem;
+  --text-6xl: 3.75rem;
+  --text-6xl--line-height: 1;
+  --text-7xl: 4.5rem;
+  --text-7xl--line-height: 1;
+  --text-8xl: 6rem;
+  --text-8xl--line-height: 1;
+  --text-9xl: 8rem;
+  --text-9xl--line-height: 1;
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
+
+  --container-8xl: 88rem;
+
+  /* Rift's palette: flat brights on ink and paper. */
+  --color-ink: #1c1c1a;
+  --color-paper: #fffdf6;
+  --color-volt: #c6f96e;
+  --color-blush: #f08bad;
+  --color-tomato: #e8394a;
+  --color-sun: #fcea5d;
+  --color-mint: #55bea6;
+  --color-tangerine: #ef6433;
+  --color-apricot: #f4b052;
+
+  /* We decided to remap the template's slate and sky scales instead of
+     rewriting every component, so template updates still merge cleanly. */
+  --color-slate-50: #fafaf9;
+  --color-slate-100: #f4f4f2;
+  --color-slate-200: #e5e5e2;
+  --color-slate-300: #cfcfcb;
+  --color-slate-400: #a1a19c;
+  --color-slate-500: #73736e;
+  --color-slate-600: #575753;
+  --color-slate-700: #41413e;
+  --color-slate-800: #2a2a27;
+  --color-slate-900: #1c1c1a;
+  --color-slate-950: #121211;
+
+  --color-sky-50: #fff4ec;
+  --color-sky-100: #ffe4d1;
+  --color-sky-200: #fdc6a3;
+  --color-sky-300: #f99b6a;
+  --color-sky-400: #f27a45;
+  --color-sky-500: #c8410f;
+  --color-sky-600: #a8360c;
+  --color-sky-700: #862c0c;
+  --color-sky-800: #6a240c;
+  --color-sky-900: #4a180a;
+
+  /* Square corners everywhere; only true circles stay round. */
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
+}
+
+@layer base {
+  [inert] ::-webkit-scrollbar {
+    display: none;
+  }
+}

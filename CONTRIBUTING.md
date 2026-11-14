@@ -75,6 +75,11 @@ Run `make` on its own to list every target.
 | `make composer …`       | Run Composer. See below.                                                      |
 | `make bun …`            | Run Bun. See below.                                                           |
 | `make go …`             | Run Go in `dash/`. See below.                                                 |
+| `make docs:install`     | Install the docs site's dependencies in `docs/`.                              |
+| `make docs:dev`         | Serve the docs site with live reload at `http://localhost:3000`.              |
+| `make docs:build`       | Build the static docs site into `docs/out`.                                   |
+| `make docs:lint`        | Check the docs site with ESLint and Prettier. `make docs:format` fixes it.    |
+| `make docs:bun`         | Run Bun in `docs/`, through `ARGS`: `make docs:bun ARGS="outdated"`.          |
 
 ### Composer, Bun and Go
 
@@ -148,6 +153,7 @@ dash/             rift-dash, the Go program that draws rift dash
 ├── internal/      app, the rift client, the snapshot contract, jobs, system and ui
 └── testdata/      snapshot.json, the contract fixture both sides are tested against
 docker/           the development images and the binary build scripts
+docs/             the documentation site, a static Next.js export
 Formula/          the Homebrew formula, as this repository is its own tap
 tests/
 ├── Feature/      commands, and classes that use a Laravel facade
@@ -391,7 +397,7 @@ Model: Opus (claude-opus-5-5)
 | `git-commit`           | Writes and checks the message for staged changes, used by agents.                   |
 | `/open-pr`             | Opens a pull request with the title and description described above.                |
 | `/address-pr-comments` | Works through open review feedback on a pull request, from [Codex] or any reviewer. |
-| `/update-dependencies` | Updates Composer and Bun dependencies, one commit per package.                      |
+| `/update-dependencies` | Updates Composer and Bun dependencies, the docs site's included, one commit per package. |
 
 The slash commands are only run by hand: their skills set
 `disable-model-invocation: true`, so an agent never starts one on its own.

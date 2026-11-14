@@ -7,6 +7,7 @@ export GID := $(shell id -g)
 RUN := docker compose run --rm php
 BUN := docker compose run --rm bun
 GO := docker compose run --rm go
+DOCS := docker compose run --rm -w /app/docs bun
 VHS := ghcr.io/charmbracelet/vhs:v0.10.0
 
 TARGET := $(if $(filter Darwin,$(shell uname -s)),darwin,linux)-$(if $(filter arm64 aarch64,$(shell uname -m)),arm64,x86_64)
@@ -35,7 +36,7 @@ $(TOOL_ARGS): $(TOOL)
 endif
 
 else
-.PHONY: help image test test\:php test\:go test\:types test\:coverage sniff lint format shell rift build demo checksums clean
+.PHONY: help image test test\:php test\:go test\:types test\:coverage sniff lint format shell rift build demo docs\:install docs\:dev docs\:build docs\:lint docs\:format docs\:bun checksums clean
 
 help: ## List the available targets
 	@grep -E '^[a-z\\:-]+:.*## ' $(MAKEFILE_LIST) | awk -F ': ## ' '{gsub(/\\/, "", $$1); printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -89,6 +90,25 @@ build: ## Build native rift and rift-dash binaries for this machine into builds/
 demo: ## Record .github/dash.gif, the dashboard demo in README.md, with VHS
 	$(GO) env CGO_ENABLED=0 go build -trimpath -o /app/builds/rift-dash-demo ./cmd/rift-dash
 	docker run --rm --user "$(UID):$(GID)" -e HOME=/tmp -v "$(CURDIR)":/app -w /app $(VHS) docker/demo/dash.tape
+
+docs\:install: ## Install the docs site's dependencies in docs/
+	$(DOCS) bun install --frozen-lockfile
+
+docs\:dev: ## Serve the docs site with live reload at http://localhost:3000
+	docker compose run --rm -p 3000:3000 -w /app/docs bun bun run dev
+
+docs\:build: ## Build the static docs site into docs/out
+	$(DOCS) bun run build
+
+docs\:lint: ## Check the docs site with ESLint and Prettier
+	$(DOCS) bun run lint
+	$(DOCS) bun run format:check
+
+docs\:format: ## Fix the docs site's formatting with Prettier
+	$(DOCS) bun run format
+
+docs\:bun: ## Run Bun in docs/, e.g. make docs:bun ARGS="update next --latest"
+	$(DOCS) bun $(ARGS)
 
 checksums: ## Re-pin the PHP runtime checksums after changing PHP_VERSION in docker/build.sh
 	$(RUN) bash docker/build.sh --checksums
