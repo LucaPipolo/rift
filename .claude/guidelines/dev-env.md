@@ -17,7 +17,7 @@ Rift drives the host's Docker, ports, DNS resolver, trust store and sudo. The de
 all of that, so anything run through `make` is safe to run without asking:
 
 `make test`, `make test:php`, `make test:go`, `make test:types`, `make test:coverage`, `make sniff`, `make lint`,
-`make format`, `make build`, `make demo`, and `make rift ARGS="..."`
+`make format`, `make build`, `make demo`, every `make docs:*` target, and `make rift ARGS="..."`
 for commands that do not touch the host, such as `list` or `--help`.
 
 `rift-dash` can be tried on the host without touching anything: run a darwin build of it under `script` with
@@ -43,6 +43,11 @@ for.
 | `make build`             | A native binary for this machine at `builds/rift`, through the PHAR.   |
 | `make composer …`        | Composer, e.g. `make composer -- outdated --direct`.                   |
 | `make bun …`             | Bun, for the commit tooling only.                                      |
+| `make docs:install`      | The docs site's dependencies, in `docs/`. Run once before the other `docs:*` targets. |
+| `make docs:dev`          | Serve the docs site with live reload at `http://localhost:3000`.       |
+| `make docs:build`        | Build the static docs site into `docs/out`.                            |
+| `make docs:lint`         | ESLint and Prettier on the docs site. `make docs:format` fixes formatting. |
+| `make docs:bun`          | Bun in `docs/`, through `ARGS`: `make docs:bun ARGS="outdated"`.        |
 | `make demo`              | Record `.github/dash.gif`, the README demo, with VHS against a fake rift. |
 | `make go …`              | Go in `dash/`, e.g. `make go mod tidy`. Make drops a leading `./`, so pass no package paths. |
 

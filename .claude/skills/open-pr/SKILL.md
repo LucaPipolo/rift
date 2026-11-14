@@ -61,11 +61,12 @@ straight to step 7. Otherwise continue to step 5, whatever the commits look like
 
 One row per commit, in commit order. For each commit, read its lockfile diff to get the exact old and new version
 numbers for that package, never the constraint: `git show {sha} -- composer.lock` for a Composer package (the
-`"version"` line under its `"name"`), `git show {sha} -- bun.lock` for a Bun one.
+`"version"` line under its `"name"`), `git show {sha} -- bun.lock` for a root Bun one, and
+`git show {sha} -- docs/bun.lock` for one of the docs site's.
 
 The `build: update vulnerable transitive dependencies` commit changes only `composer.lock` (or `bun.lock`) for
-packages that aren't direct dependencies: give it one row per package its body lists, with the versions from that
-body.
+packages that aren't direct dependencies, and `build: update vulnerable transitive docs dependencies` only
+`docs/bun.lock`: give each one row per package its body lists, with the versions from that body.
 
 A deferred package (a major bump needing code changes, reported instead of committed; see
 `update-dependencies`'s Boundaries) leaves no trace in git: nothing was committed for it, so it appears in no
