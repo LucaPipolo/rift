@@ -2,7 +2,8 @@
 title: Introduction
 nextjs:
   metadata:
-    title: Rift
+    title:
+      absolute: Rift - Every agent gets its own running app
     description: Run AI agents in parallel, each on its own Git worktree and its own running app, with separate containers, ports and a local HTTPS address. For Docker Compose and Laravel Sail projects.
 ---
 
