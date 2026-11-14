@@ -80,7 +80,8 @@ Run `make` on its own to list every target.
 | `make go …`             | Run Go in `dash/`. See below.                                                 |
 | `make docs:install`     | Install the docs site's dependencies in `docs/`.                              |
 | `make docs:dev`         | Serve the docs site with live reload at `http://localhost:3000`.              |
-| `make docs:build`       | Build the static docs site into `docs/out`.                                   |
+| `make docs:build`       | Build the static docs site, and its Vercel output with security headers.      |
+| `make docs:preview`     | Serve the built site with its production headers at `http://localhost:3001`.  |
 | `make docs:lint`        | Check the docs site with ESLint and Prettier. `make docs:format` fixes it.    |
 | `make docs:bun`         | Run Bun in `docs/`, through `ARGS`: `make docs:bun ARGS="outdated"`.          |
 
