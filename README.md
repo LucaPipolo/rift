@@ -1,4 +1,9 @@
-# Rift
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/rift-dark.svg">
+    <img alt="Rift" src=".github/rift-light.svg" height="56">
+  </picture>
+</h1>
 
 [![Tests][badge-tests]][workflow-tests]
 [![Static analysis][badge-sniff]][workflow-sniff]
