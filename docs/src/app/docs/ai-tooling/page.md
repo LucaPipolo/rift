@@ -35,7 +35,7 @@ Model: Opus (claude-opus-5-5)
 | `git-commit`           | Writes and checks the message for staged changes, used by agents.                                                                                    |
 | `/open-pr`             | Opens a pull request with the title and description described in [Commits and pull requests](/docs/commits-and-pull-requests#title-and-description). |
 | `/address-pr-comments` | Works through open review feedback on a pull request, from [Codex](https://openai.com/codex/) or any reviewer.                                       |
-| `/update-dependencies` | Updates Composer and Bun dependencies, one commit per package.                                                                                       |
+| `/update-dependencies` | Updates Composer and Bun dependencies, the docs site's included, one commit per package.                                                             |
 
 The slash commands are only run by hand: their skills set
 `disable-model-invocation: true`, so an agent never starts one on its own.

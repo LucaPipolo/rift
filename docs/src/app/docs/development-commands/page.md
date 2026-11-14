@@ -39,13 +39,14 @@ on its own to list them all. {% .lead %}
 
 ## This documentation site
 
-| Command             | What it does                                                |
-| ------------------- | ----------------------------------------------------------- |
-| `make docs:install` | Install the site's dependencies in `docs/`.                 |
-| `make docs:dev`     | Serve the site with live reload at `http://localhost:3000`. |
-| `make docs:build`   | Build the static site into `docs/out`.                      |
-| `make docs:lint`    | Check the site with ESLint and Prettier.                    |
-| `make docs:format`  | Fix the site's formatting with Prettier.                    |
+| Command             | What it does                                                         |
+| ------------------- | -------------------------------------------------------------------- |
+| `make docs:install` | Install the site's dependencies in `docs/`.                          |
+| `make docs:dev`     | Serve the site with live reload at `http://localhost:3000`.          |
+| `make docs:build`   | Build the static site into `docs/out`.                               |
+| `make docs:lint`    | Check the site with ESLint and Prettier.                             |
+| `make docs:format`  | Fix the site's formatting with Prettier.                             |
+| `make docs:bun`     | Run Bun in `docs/`, through `ARGS`: `make docs:bun ARGS="outdated"`. |
 
 [Editing the docs](/docs/project-structure#the-documentation-site) explains
 where each page lives.
