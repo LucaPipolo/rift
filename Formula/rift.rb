@@ -9,7 +9,7 @@
 class Rift < Formula
   desc "Run Git worktrees side by side, each with its own containers and HTTPS domain"
   homepage "https://github.com/LucaPipolo/rift"
-  version "1.1.0"
+  version "1.2.0"
   license "MIT"
 
   # The binaries embed their own PHP runtime, so nothing here depends on
@@ -17,24 +17,24 @@ class Rift < Formula
   on_macos do
     on_arm do
       url "https://github.com/LucaPipolo/rift/releases/download/v#{version}/rift-darwin-arm64"
-      sha256 "a8b13e7b52c452b99c57edfc3a7272a328f764cb2e672577001b6b5378046dbb"
+      sha256 "75981fd1a0d9b2db0ad754ff233cf149bf24b416b3f657065faab0c8c7b280b9"
     end
 
     on_intel do
       url "https://github.com/LucaPipolo/rift/releases/download/v#{version}/rift-darwin-x86_64"
-      sha256 "e17f78d28d8a6c61a6747914839c043e5b024f4ee0b816326de533b890eaeb3c"
+      sha256 "04e9f0c081d936d4ac0f051f47868e5a604c06a71a60b0a6f142ae5d656761cf"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/LucaPipolo/rift/releases/download/v#{version}/rift-linux-arm64"
-      sha256 "8ff336dd3617369145d1d49daaf358594934437b9e6e1e11f8f75779db0c6cfe"
+      sha256 "bd9f49fc280ed80de807a221e59b25fbdaf71b813557bb188a2f14db5f054eff"
     end
 
     on_intel do
       url "https://github.com/LucaPipolo/rift/releases/download/v#{version}/rift-linux-x86_64"
-      sha256 "cb3222b858bf8cac31cc8f9585b047fe899b3511e35290b0cec908bdcf954836"
+      sha256 "001109c1ccd55bf0309507ff02bfe42b4df603dd30ce612ec2e17027c614c357"
     end
   end
 
