@@ -57,7 +57,7 @@ facade call or a contract, see the PHP rules), not an ignore comment.
 
 ```bash
 make test
-make test:unit ARGS="--filter=PortResolver"
+make test:php ARGS="--filter=PortResolver"
 make test:coverage
 ```
 

@@ -14,14 +14,15 @@ not mirror each other.
 
 ## What each covers
 
-`README.md` is for Rift's users, in its current order: what Rift is, `Why use Rift?`, `Install`, `Get started` as
-numbered steps, `Everyday usage`, `Integrate with an agent development environment`,
-`Configuration and advanced usage` (each topic in a collapsed `<details>` block), `Need help?`, `Contributing`,
-and `Licence`.
+`README.md` is for Rift's users, and is where they decide whether to use it, so it shows Rift working: the dashboard
+demo (`.github/dash.gif`, recorded with `make demo`) sits under the introduction. In its current order: what Rift is,
+`Why use Rift?`, `Install`, `Get started` as numbered steps, `Everyday usage`, `Integrate with an agent development
+environment`, `Configuration and advanced usage` (each topic in a collapsed `<details>` block), `Need help?`,
+`Contributing`, and `Licence`.
 
-`CONTRIBUTING.md` is for people working on Rift itself: getting started, development commands, trying a change,
-project structure, code conventions, tests, commit messages, pull requests, AI tooling, releasing, and reporting
-bugs.
+`CONTRIBUTING.md` is for people working on Rift itself: how Rift is built (the stack, the two programs and the contract
+between them), getting started, development commands, trying a change, project structure, code conventions, tests,
+commit messages, pull requests, AI tooling, releasing, and reporting bugs.
 
 `README.md` never lists what `CONTRIBUTING.md` contains, and a detail only someone working on the code needs goes in
 `CONTRIBUTING.md`, never back in `README.md`.

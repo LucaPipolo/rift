@@ -33,12 +33,20 @@ jobs:
           coverage: none
           ini-values: phar.readonly=0
 
-      # Builds rift.phar and appends it to a pinned, checksum-verified static PHP
-      # runtime per platform. `make build` runs the same script locally.
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: dash/go.mod
+          cache-dependency-path: dash/go.sum
+
+      # Builds rift-dash per platform, then rift.phar, and appends a copy of the
+      # PHAR carrying that platform's rift-dash to a pinned, checksum-verified
+      # static PHP runtime. `make build` runs the same scripts locally.
       - name: Build the binaries
         env:
           VERSION: ${{ github.event.release.tag_name }}
-        run: bash docker/build.sh darwin-arm64 darwin-x86_64 linux-arm64 linux-x86_64
+        run: |
+          sh docker/build-dash.sh darwin-arm64 darwin-x86_64 linux-arm64 linux-x86_64
+          bash docker/build.sh darwin-arm64 darwin-x86_64 linux-arm64 linux-x86_64
 
       - name: Collect the release assets
         run: |

@@ -1,0 +1,36 @@
+# Linters and formatters for rift-dash: `make lint` and `make format` run the formatters, `make sniff` the linters.
+version: "2"
+
+linters:
+  default: standard
+  enable:
+    - errorlint
+    - gocritic
+    - godot
+    - misspell
+    - revive
+    - unconvert
+    - unparam
+  settings:
+    revive:
+      rules:
+        # Functions, methods and types need doc comments; constants and variables whose name says it all do not.
+        - name: exported
+          arguments:
+            - disableChecksOnConstants
+            - disableChecksOnVariables
+        - name: package-comments
+        - name: var-naming
+        - name: receiver-naming
+        - name: indent-error-flow
+    godot:
+      scope: all
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/LucaPipolo/rift/dash

@@ -12,10 +12,14 @@ shared-state operation still need explicit confirmation.
 A commit is atomic when checking it out alone leaves the project in a working state and it stands for one complete,
 self-contained change: never a whole feature bundled into one commit, never split so finely that a commit carries no
 value on its own. Working state means what CI checks: `make lint`, `make sniff`, `make test` and
-`make test:coverage` all pass, so a new class lands with its tests in the same commit, at 100% coverage. Changes that
-depend on each other belong in the same commit; unrelated changes belong in separate ones.
+`make test:coverage` all pass, for PHP and Go alike, so a new class or Go file lands with its
+tests in the same commit, at 100% coverage. Changes that depend on each other belong in the same commit; unrelated
+changes belong in separate ones.
 
 AI tooling (`CLAUDE.md`, `.claude/`, `.mcp.json`) is always its own `ai:` commit, never mixed with code or docs.
+
+The `git-commit` skill words each message on a smaller model, so pass it the model that did the work
+(`Model: Opus (claude-opus-5-5)`): the trailer credits whoever made the change, never whoever wrote the message.
 
 If a later change genuinely belongs with a commit already made in this task, and that commit has not been
 pushed, fix it up with `git commit --fixup=<sha>` instead of folding it into the next commit. Fixup only ever

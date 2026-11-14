@@ -15,6 +15,7 @@ permissions:
 
 jobs:
   lint:
+    name: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -24,8 +25,25 @@ jobs:
           php-version: '8.5'
           coverage: none
 
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: dash/go.mod
+          cache-dependency-path: dash/go.sum
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
-      - name: Check formatting
+      - name: Check PHP formatting
         run: vendor/bin/pint --test
+
+      # The same golangci-lint as docker/go.Dockerfile, so CI and `make lint` agree.
+      - uses: golangci/golangci-lint-action@v9
+        if: ${{ !cancelled() }}
+        with:
+          version: v2.15.0
+          install-only: true
+
+      - name: Check Go formatting
+        if: ${{ !cancelled() }}
+        working-directory: dash
+        run: golangci-lint fmt --diff

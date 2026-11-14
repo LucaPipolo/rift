@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Config\PortBinding;
+use App\Docker\Container;
 use App\Docker\Docker;
 use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\Process;
@@ -379,3 +380,51 @@ describe('containersFromImage()', function (): void {
         expect((new Docker())->containersFromImage('caddy:latest'))->toBe([]);
     });
 });
+
+describe('containers()', function (): void {
+    it('returns every Compose container docker ps lists', function (): void {
+        Process::fake(['*docker*ps*' => composeContainerJson('myapp-app-1', 'myapp', 'app') . "\n" . composeContainerJson('shop-app-1', 'shop', 'app') . "\n"]);
+
+        expect(array_map(fn (Container $container) => $container->name, (new Docker())->containers()))->toBe(['myapp-app-1', 'shop-app-1']);
+    });
+
+    it('leaves out containers Compose did not create', function (): void {
+        Process::fake(['*docker*ps*' => json_encode(['Names' => 'rift-router', 'Labels' => '']) . "\n"]);
+
+        expect((new Docker())->containers())->toBe([]);
+    });
+
+    it('lists stopped containers too', function (): void {
+        Process::fake(['*docker*ps*' => '']);
+
+        (new Docker())->containers();
+
+        Process::assertRan(fn (PendingProcess $process) => $process->command === ['docker', 'ps', '-a', '--no-trunc', '--format', '{{json .}}']);
+    });
+
+    it('returns nothing when docker ps fails', function (): void {
+        Process::fake(['*docker*ps*' => Process::result(output: composeContainerJson('myapp-app-1', 'myapp', 'app'), exitCode: 1)]);
+
+        expect((new Docker())->containers())->toBe([]);
+    });
+});
+
+/**
+ * Build the line docker ps prints for a Compose container.
+ *
+ * @param  string  $name  The container name.
+ * @param  string  $project  The Compose project.
+ * @param  string  $service  The Compose service.
+ *
+ * @return string The JSON line.
+ */
+function composeContainerJson(string $name, string $project, string $service): string
+{
+    return (string) json_encode([
+        'Names' => $name,
+        'Labels' => "com.docker.compose.project={$project},com.docker.compose.service={$service}",
+        'State' => 'running',
+        'Status' => 'Up 2 hours',
+        'Image' => 'nginx',
+    ]);
+}

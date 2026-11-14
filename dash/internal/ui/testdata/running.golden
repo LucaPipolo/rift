@@ -1,0 +1,40 @@
+ rift   ● rift-router :80 :443   ✓ CA trusted   │   3 serving  1 unreachable  1 failed  1 stopped                                           
+╭─ [1] Projects ───────────────────────────────────╮╭─  Overview │ Containers │ Logs │ Env │ Hooks │ Git  ────────────── search.myapp.test ╮
+│ ● myapp           myapp.test                 3/5 ││ urls                                                                                 │
+│ ● shop            shop.test                  1/1 ││ ✓ https://search.myapp.test                                                          │
+│ ! broken          cannot read rift.yaml      0/0 ││ ✓ https://api.search.myapp.test                                                      │
+╰──────────────────────────────────────────────────╯│                                                                                      │
+╭─ [2] Checkouts · myapp ──────────────────────────╮│ checkout                                                                             │
+│ ● main          main                             ││ state             ● serving                                                          │
+│ ● search        feat/search       ↑3 ↓1 ✎2    8s ││ branch            feat/search ↑3 ↓1 against main                                     │
+│ ◐ pdf-export    feat/pdf-export                  ││ path              /Sites/myapp-search                                                │
+│ ✗ orders        refactor/orders                  ││ compose project   myapp-search                                                       │
+│ ○ fix-login     (detached)                    2h ││ app               app:80 · preset compose                                            │
+│                                                  ││ uncommitted       2 files · last change 8s ago                                       │
+│                                                  ││                                                                                      │
+│                                                  ││ host ports                                                                           │
+│                                                  ││ VITE_PORT         5174 (default 5173 was taken)                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+│                                                  ││                                                                                      │
+╰──────────────────────────────────────────────────╯│                                                                                      │
+╭─ [3] Router ─────────────────────────────────────╮│                                                                                      │
+│ ● running · caddy:latest                         ││                                                                                      │
+│ 3 routes · 2 on its network                      ││                                                                                      │
+╰──────────────────────────────────────────────────╯╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Command log · ⠋ rift up · search.myapp.test ────────────────────────────────────────────────────────────────────────────────────────────╮
+│ › rift up · search.myapp.test                                                                                                            │
+│   Starting containers                                                                                                                    │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+ u up  d down  r restart  o open  e shell  n new  x remove  space mark  / filter  [ ] tab  : commands  ? help  q quit                       

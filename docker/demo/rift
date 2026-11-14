@@ -1,0 +1,23 @@
+#!/bin/sh
+# Stands in for rift while VHS records the dashboard demo: it serves the
+# contract fixture with fresh change times, and logs from docker/demo/logs.
+fixture=/app/dash/testdata/snapshot.json
+
+snapshot() {
+    now="$(date +%s)"
+    tr -d '\n' < "$fixture" | sed -E \
+        -e "s/\"changedAt\": *1799999992/\"changedAt\": $((now - 8))/" \
+        -e "s/\"changedAt\": *1799992800/\"changedAt\": $((now - 7200))/" \
+        -e 's/"logs": *\[[^]]*\]/"logs": ["sh", "\/app\/docker\/demo\/logs"]/g'
+    echo
+}
+
+case "$1" in
+    dash:watch)
+        snapshot
+        while IFS= read -r line; do
+            [ "$line" = refresh ] && snapshot
+        done
+        ;;
+    *) echo "The demo does not run rift $*."; exit 1 ;;
+esac

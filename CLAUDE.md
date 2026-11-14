@@ -8,7 +8,8 @@ PHP runtime) through GitHub releases and a Homebrew tap that lives in this repos
 ## Foundational Context
 
 This is a Laravel Zero console application. It has no web layer, no database and no runtime configuration of its
-own beyond `rift.yaml` in a project and the global router config.
+own beyond `rift.yaml` in a project and the global router config. `rift dash` is drawn by `rift-dash`, a Go program
+in `dash/` that every release binary carries inside its PHAR.
 
 - php — 8.5
 - laravel-zero/framework — 13
@@ -20,6 +21,9 @@ own beyond `rift.yaml` in a project and the global router config.
 - mockery/mockery — 1
 - husky — 9
 - commitlint — 21
+- go — 1.27, in `dash/` only
+- charm.land/bubbletea — 2, charm.land/lipgloss — 2
+- golangci-lint — 2
 
 ## Project structure
 
@@ -30,12 +34,14 @@ app/
 ├── Config/        rift.yaml (ProjectConfig), the global router config (RouterConfig, PortBinding), the init template
 ├── Contracts/     interfaces for what touches the host, so tests can swap in fakes
 ├── Docker/        the Docker CLI, Compose files, and the runner for containers and hooks
-├── Enums/         presets, hook stages, container states
+├── Dashboard/     the snapshot `rift dash` shows, its JSON contract (SnapshotJson), and finding rift-dash (Companion)
+├── Enums/         presets, hook stages, checkout and container states
 ├── Env/           projecting derived values into .env, free host ports, name resolution and addresses
 ├── Exceptions/    errors the user can act on
 ├── Providers/     container bindings (AppServiceProvider)
 ├── Router/        the shared Caddy router, its admin API and its local CA
 └── Support/       terminal output (Ui, Outcome)
+dash/               rift-dash in Go: cmd/rift-dash, internal/{app,rift,snapshot,jobs,system,ui}, testdata/snapshot.json
 bootstrap/          Laravel Zero bootstrap and provider list
 config/             app and command registration
 docker/             development images, and build.sh for the release binaries

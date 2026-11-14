@@ -86,6 +86,23 @@ enum Preset: string
     }
 
     /**
+     * Get the command that opens an interactive shell in a service's container, bash where it has one.
+     *
+     * @param  string  $service  The Compose service name.
+     *
+     * @return list<string> The command arguments.
+     */
+    public function shellCommand(string $service): array
+    {
+        $prefix = match ($this) {
+            self::Compose => ['docker', 'compose', 'exec', $service],
+            self::Sail => ['./vendor/bin/sail', 'exec', $service],
+        };
+
+        return [...$prefix, 'sh', '-c', 'command -v bash >/dev/null && exec bash || exec sh'];
+    }
+
+    /**
      * Get the hook that installs what the up command itself depends on.
      *
      * Sail is a Composer dependency, so a fresh checkout installs it through a

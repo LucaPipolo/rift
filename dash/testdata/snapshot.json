@@ -1,0 +1,547 @@
+{
+    "version": 1,
+    "router": {
+        "name": "rift-router",
+        "image": "caddy:latest",
+        "admin": "http://localhost:2019",
+        "listening": ":80 :443",
+        "binding": "80 and 443",
+        "network": "rift-router",
+        "configPath": "/home/you/.config/rift/config.yaml",
+        "running": true,
+        "answering": true,
+        "trusted": true,
+        "members": [
+            "myapp-app-1",
+            "shop-laravel.test-1"
+        ],
+        "routes": [
+            {
+                "id": "myapp",
+                "hosts": [
+                    "myapp.test",
+                    "api.myapp.test"
+                ],
+                "upstream": "myapp-app-1:80",
+                "reachable": true
+            },
+            {
+                "id": "myapp-pdf-export",
+                "hosts": [
+                    "pdf-export.myapp.test"
+                ],
+                "upstream": "myapp-pdf-export-app-1:80",
+                "reachable": false
+            },
+            {
+                "id": "shop",
+                "hosts": [
+                    "shop.test"
+                ],
+                "upstream": "shop-laravel.test-1:80",
+                "reachable": true
+            }
+        ]
+    },
+    "projects": [
+        {
+            "name": "myapp",
+            "root": "/Sites/myapp",
+            "domain": "myapp.test",
+            "error": null,
+            "checkouts": [
+                {
+                    "label": "main",
+                    "root": "/Sites/myapp",
+                    "main": true,
+                    "branch": "main",
+                    "state": "serving",
+                    "up": true,
+                    "domain": "myapp.test",
+                    "urls": [
+                        "https://myapp.test",
+                        "https://api.myapp.test"
+                    ],
+                    "composeName": "myapp",
+                    "preset": "compose",
+                    "appService": "app",
+                    "appPort": 80,
+                    "exitCode": null,
+                    "network": "rift-router",
+                    "containers": [
+                        {
+                            "name": "myapp-app-1",
+                            "service": "app",
+                            "state": "running",
+                            "status": "Up 2 hours",
+                            "running": true,
+                            "exitCode": null,
+                            "health": null
+                        },
+                        {
+                            "name": "myapp-mysql-1",
+                            "service": "mysql",
+                            "state": "running",
+                            "status": "Up 2 hours (healthy)",
+                            "running": true,
+                            "exitCode": null,
+                            "health": "healthy"
+                        }
+                    ],
+                    "git": {
+                        "ahead": 0,
+                        "behind": 0,
+                        "changes": [],
+                        "changedAt": null
+                    },
+                    "ports": [
+                        {
+                            "key": "VITE_PORT",
+                            "value": "5173",
+                            "default": 5173
+                        }
+                    ],
+                    "env": [
+                        {
+                            "key": "VITE_PORT",
+                            "value": "5173",
+                            "source": "free host port"
+                        }
+                    ],
+                    "hooks": [],
+                    "shell": [
+                        "docker",
+                        "compose",
+                        "exec",
+                        "app",
+                        "sh",
+                        "-c",
+                        "command -v bash >/dev/null && exec bash || exec sh"
+                    ],
+                    "logs": [
+                        "docker",
+                        "compose",
+                        "-p",
+                        "myapp",
+                        "logs",
+                        "--no-color",
+                        "--tail",
+                        "200",
+                        "--follow"
+                    ]
+                },
+                {
+                    "label": "search",
+                    "root": "/Sites/myapp-search",
+                    "main": false,
+                    "branch": "feat/search",
+                    "state": "serving",
+                    "up": true,
+                    "domain": "search.myapp.test",
+                    "urls": [
+                        "https://search.myapp.test",
+                        "https://api.search.myapp.test"
+                    ],
+                    "composeName": "myapp-search",
+                    "preset": "compose",
+                    "appService": "app",
+                    "appPort": 80,
+                    "exitCode": null,
+                    "network": "rift-router",
+                    "containers": [
+                        {
+                            "name": "myapp-search-app-1",
+                            "service": "app",
+                            "state": "running",
+                            "status": "Up 2 hours",
+                            "running": true,
+                            "exitCode": null,
+                            "health": null
+                        },
+                        {
+                            "name": "myapp-search-mysql-1",
+                            "service": "mysql",
+                            "state": "running",
+                            "status": "Up 2 hours (healthy)",
+                            "running": true,
+                            "exitCode": null,
+                            "health": "healthy"
+                        }
+                    ],
+                    "git": {
+                        "ahead": 3,
+                        "behind": 1,
+                        "changes": [
+                            "a.php",
+                            "b.php"
+                        ],
+                        "changedAt": 1799999992
+                    },
+                    "ports": [
+                        {
+                            "key": "VITE_PORT",
+                            "value": "5174",
+                            "default": 5173
+                        }
+                    ],
+                    "env": [
+                        {
+                            "key": "VITE_PORT",
+                            "value": "5174",
+                            "source": "free host port"
+                        }
+                    ],
+                    "hooks": [],
+                    "shell": [
+                        "docker",
+                        "compose",
+                        "exec",
+                        "app",
+                        "sh",
+                        "-c",
+                        "command -v bash >/dev/null && exec bash || exec sh"
+                    ],
+                    "logs": [
+                        "docker",
+                        "compose",
+                        "-p",
+                        "myapp-search",
+                        "logs",
+                        "--no-color",
+                        "--tail",
+                        "200",
+                        "--follow"
+                    ]
+                },
+                {
+                    "label": "pdf-export",
+                    "root": "/Sites/myapp-pdf-export",
+                    "main": false,
+                    "branch": "feat/pdf-export",
+                    "state": "unreachable",
+                    "up": true,
+                    "domain": "pdf-export.myapp.test",
+                    "urls": [
+                        "https://pdf-export.myapp.test",
+                        "https://api.pdf-export.myapp.test"
+                    ],
+                    "composeName": "myapp-pdf-export",
+                    "preset": "compose",
+                    "appService": "app",
+                    "appPort": 80,
+                    "exitCode": null,
+                    "network": "rift-router",
+                    "containers": [
+                        {
+                            "name": "myapp-pdf-export-app-1",
+                            "service": "app",
+                            "state": "running",
+                            "status": "Up 2 hours",
+                            "running": true,
+                            "exitCode": null,
+                            "health": null
+                        },
+                        {
+                            "name": "myapp-pdf-export-mysql-1",
+                            "service": "mysql",
+                            "state": "running",
+                            "status": "Up 2 hours (healthy)",
+                            "running": true,
+                            "exitCode": null,
+                            "health": "healthy"
+                        }
+                    ],
+                    "git": {
+                        "ahead": 0,
+                        "behind": 0,
+                        "changes": [],
+                        "changedAt": null
+                    },
+                    "ports": [
+                        {
+                            "key": "VITE_PORT",
+                            "value": null,
+                            "default": 5173
+                        }
+                    ],
+                    "env": [],
+                    "hooks": [],
+                    "shell": [
+                        "docker",
+                        "compose",
+                        "exec",
+                        "app",
+                        "sh",
+                        "-c",
+                        "command -v bash >/dev/null && exec bash || exec sh"
+                    ],
+                    "logs": [
+                        "docker",
+                        "compose",
+                        "-p",
+                        "myapp-pdf-export",
+                        "logs",
+                        "--no-color",
+                        "--tail",
+                        "200",
+                        "--follow"
+                    ]
+                },
+                {
+                    "label": "orders",
+                    "root": "/Sites/myapp-orders",
+                    "main": false,
+                    "branch": "refactor/orders",
+                    "state": "failed",
+                    "up": false,
+                    "domain": "orders.myapp.test",
+                    "urls": [
+                        "https://orders.myapp.test",
+                        "https://api.orders.myapp.test"
+                    ],
+                    "composeName": "myapp-orders",
+                    "preset": "compose",
+                    "appService": "app",
+                    "appPort": 80,
+                    "exitCode": 137,
+                    "network": "rift-router",
+                    "containers": [
+                        {
+                            "name": "myapp-orders-app-1",
+                            "service": "app",
+                            "state": "exited",
+                            "status": "Exited (137) 4 minutes ago",
+                            "running": false,
+                            "exitCode": 137,
+                            "health": null
+                        },
+                        {
+                            "name": "myapp-orders-mysql-1",
+                            "service": "mysql",
+                            "state": "running",
+                            "status": "Up 2 hours (healthy)",
+                            "running": true,
+                            "exitCode": null,
+                            "health": "healthy"
+                        }
+                    ],
+                    "git": {
+                        "ahead": 0,
+                        "behind": 0,
+                        "changes": [],
+                        "changedAt": null
+                    },
+                    "ports": [
+                        {
+                            "key": "VITE_PORT",
+                            "value": null,
+                            "default": 5173
+                        }
+                    ],
+                    "env": [],
+                    "hooks": [],
+                    "shell": [
+                        "docker",
+                        "compose",
+                        "exec",
+                        "app",
+                        "sh",
+                        "-c",
+                        "command -v bash >/dev/null && exec bash || exec sh"
+                    ],
+                    "logs": [
+                        "docker",
+                        "compose",
+                        "-p",
+                        "myapp-orders",
+                        "logs",
+                        "--no-color",
+                        "--tail",
+                        "200",
+                        "--follow"
+                    ]
+                },
+                {
+                    "label": "fix-login",
+                    "root": "/Sites/myapp-fix-login",
+                    "main": false,
+                    "branch": null,
+                    "state": "stopped",
+                    "up": false,
+                    "domain": "fix-login.myapp.test",
+                    "urls": [
+                        "https://fix-login.myapp.test",
+                        "https://api.fix-login.myapp.test"
+                    ],
+                    "composeName": "myapp-fix-login",
+                    "preset": "compose",
+                    "appService": "app",
+                    "appPort": 80,
+                    "exitCode": null,
+                    "network": "rift-router",
+                    "containers": [],
+                    "git": {
+                        "ahead": 0,
+                        "behind": 0,
+                        "changes": [],
+                        "changedAt": 1799992800
+                    },
+                    "ports": [
+                        {
+                            "key": "VITE_PORT",
+                            "value": null,
+                            "default": 5173
+                        }
+                    ],
+                    "env": [],
+                    "hooks": [],
+                    "shell": [
+                        "docker",
+                        "compose",
+                        "exec",
+                        "app",
+                        "sh",
+                        "-c",
+                        "command -v bash >/dev/null && exec bash || exec sh"
+                    ],
+                    "logs": [
+                        "docker",
+                        "compose",
+                        "-p",
+                        "myapp-fix-login",
+                        "logs",
+                        "--no-color",
+                        "--tail",
+                        "200",
+                        "--follow"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "shop",
+            "root": "/Sites/shop",
+            "domain": "shop.test",
+            "error": null,
+            "checkouts": [
+                {
+                    "label": "main",
+                    "root": "/Sites/shop",
+                    "main": true,
+                    "branch": "main",
+                    "state": "serving",
+                    "up": true,
+                    "domain": "shop.test",
+                    "urls": [
+                        "https://shop.test"
+                    ],
+                    "composeName": "shop",
+                    "preset": "sail",
+                    "appService": "laravel.test",
+                    "appPort": 80,
+                    "exitCode": null,
+                    "network": "rift-router",
+                    "containers": [
+                        {
+                            "name": "shop-laravel.test-1",
+                            "service": "laravel.test",
+                            "state": "running",
+                            "status": "Up 2 hours",
+                            "running": true,
+                            "exitCode": null,
+                            "health": null
+                        },
+                        {
+                            "name": "shop-mysql-1",
+                            "service": "mysql",
+                            "state": "running",
+                            "status": "Up 2 hours (healthy)",
+                            "running": true,
+                            "exitCode": null,
+                            "health": "healthy"
+                        }
+                    ],
+                    "git": {
+                        "ahead": 0,
+                        "behind": 0,
+                        "changes": [],
+                        "changedAt": null
+                    },
+                    "ports": [
+                        {
+                            "key": "FORWARD_DB_PORT",
+                            "value": "3307",
+                            "default": 3306
+                        }
+                    ],
+                    "env": [
+                        {
+                            "key": "COMPOSE_PROJECT_NAME",
+                            "value": "shop",
+                            "source": "rift"
+                        },
+                        {
+                            "key": "FORWARD_DB_PORT",
+                            "value": "3307",
+                            "source": "free host port"
+                        },
+                        {
+                            "key": "APP_URL",
+                            "value": null,
+                            "source": "rift.yaml: https://{domain}"
+                        }
+                    ],
+                    "hooks": [
+                        {
+                            "stage": "before_up",
+                            "label": "Installing PHP dependencies",
+                            "run": "docker run --rm -u \"$(id -u):$(id -g)\" -v \"$PWD:/var/www/html\" -w /var/www/html composer:latest composer install --ignore-platform-reqs --no-scripts",
+                            "onHost": true,
+                            "unlessExists": "vendor/bin/sail"
+                        },
+                        {
+                            "stage": "after_up",
+                            "label": "Migrating",
+                            "run": "php artisan migrate",
+                            "onHost": false,
+                            "unlessExists": null
+                        },
+                        {
+                            "stage": "before_down",
+                            "label": null,
+                            "run": "npm run stop",
+                            "onHost": true,
+                            "unlessExists": null
+                        }
+                    ],
+                    "shell": [
+                        "./vendor/bin/sail",
+                        "exec",
+                        "laravel.test",
+                        "sh",
+                        "-c",
+                        "command -v bash >/dev/null && exec bash || exec sh"
+                    ],
+                    "logs": [
+                        "docker",
+                        "compose",
+                        "-p",
+                        "shop",
+                        "logs",
+                        "--no-color",
+                        "--tail",
+                        "200",
+                        "--follow"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "broken",
+            "root": "/Sites/broken",
+            "domain": null,
+            "error": "/Sites/broken/rift.yaml: `name` is required.",
+            "checkouts": []
+        }
+    ]
+}

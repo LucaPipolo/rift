@@ -1,0 +1,23 @@
+#!/bin/sh
+# Stands in for rift in tests: prints the contract fixture for dash:watch, a plan for dash:plan.
+# FAKE_RIFT makes it misbehave: "fail" exits with an error, "garbage" prints what is not JSON.
+here="$(cd "$(dirname "$0")" && pwd)"
+
+case "${FAKE_RIFT:-}" in
+    fail) echo "rift: projects.yaml: \`projects\` must be a list of directories." >&2; exit 1 ;;
+    garbage) echo "not json"; exit 0 ;;
+    silent) exit 0 ;;
+esac
+
+case "$1" in
+    dash:watch)
+        tr -d '\n' < "$here/../../../testdata/snapshot.json"; echo
+        while IFS= read -r line; do
+            [ "$line" = refresh ] && { tr -d '\n' < "$here/../../../testdata/snapshot.json"; echo; }
+        done
+        ;;
+    dash:plan)
+        printf '{"branch":"%s","path":"%s-x","domain":"x.myapp.test","composeName":"myapp-x","exists":false,"error":null}\n' "$3" "$2"
+        ;;
+    *) echo "fake rift: $*"; exit 3 ;;
+esac

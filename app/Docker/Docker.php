@@ -51,6 +51,32 @@ final class Docker
     }
 
     /**
+     * Get every Compose container on this machine, running or not.
+     *
+     * @return list<Container> The containers, in the order Docker lists them.
+     */
+    public function containers(): array
+    {
+        $result = Process::run(['docker', 'ps', '-a', '--no-trunc', '--format', '{{json .}}']);
+
+        if (! $result->successful()) {
+            return [];
+        }
+
+        $containers = [];
+
+        foreach (explode("\n", trim($result->output())) as $line) {
+            $container = Container::fromJson($line);
+
+            if ($container !== null) {
+                $containers[] = $container;
+            }
+        }
+
+        return $containers;
+    }
+
+    /**
      * Determine whether a container exists, running or not.
      *
      * @param  string  $name  The container name.
