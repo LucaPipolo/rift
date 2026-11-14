@@ -6,7 +6,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { Dialog, DialogPanel } from '@headlessui/react'
 
 import { Glyph } from '@/components/Glyph'
-import { Logomark } from '@/components/Logo'
+import { Logo } from '@/components/Logo'
 import { Navigation } from '@/components/Navigation'
 
 function CloseOnNavigation({ close }: { close: () => void }) {
@@ -66,7 +66,7 @@ export function MobileNavigation() {
                 <Glyph name="close" className="h-8 w-8" />
               </button>
               <Link href="/" className="ml-6" aria-label="Home page">
-                <Logomark className="h-9 w-9" />
+                <Logo />
               </Link>
             </div>
             <Navigation className="mt-5 px-1" onLinkClick={onLinkClick} />
