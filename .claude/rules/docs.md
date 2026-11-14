@@ -40,8 +40,10 @@ Never use an em dash (—) or an en dash (–). Rewrite the sentence instead.
 
 ## Structure
 
-- Both files open with a `#` title (`# Rift`, `# Contributing to Rift`). In `README.md`, the CI status badges, one
-  per workflow, plus the Homebrew and sponsor badges, sit directly under it.
+- `README.md` opens with the Rift wordmark as its `<h1>`: a `<picture>` serving `.github/rift-dark.svg` to dark mode
+  and `.github/rift-light.svg` otherwise, with `alt="Rift"`. `CONTRIBUTING.md` opens with `# Contributing to Rift`.
+  In `README.md`, the CI status badges, one per workflow, plus the Homebrew and sponsor badges, sit directly under
+  the wordmark.
 - Prose is hard-wrapped at 80 columns. Tables and long link lines may run past it.
 - Links are reference-style (`[Docker Compose]`, `[Git worktree][worktrees]`), never inline, with the
   definitions at the end of the file: sorted alphabetically in `CONTRIBUTING.md`, and in `README.md` the links
