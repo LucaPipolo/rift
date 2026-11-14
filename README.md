@@ -484,9 +484,10 @@ For development setup and contribution guidelines, see
 
 ## Licence
 
-MIT
+Rift is open source under the [MIT licence][licence].
 
 [Docker Compose]: https://docs.docker.com/compose/
+[licence]: LICENSE
 [Laravel Sail]: https://laravel.com/docs/sail
 [worktrees]: https://git-scm.com/docs/git-worktree
 [Caddy]: https://caddyserver.com/
