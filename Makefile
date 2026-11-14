@@ -36,7 +36,7 @@ $(TOOL_ARGS): $(TOOL)
 endif
 
 else
-.PHONY: help image test test\:php test\:go test\:types test\:coverage sniff lint format shell rift build demo docs\:install docs\:dev docs\:build docs\:lint docs\:format checksums clean
+.PHONY: help image test test\:php test\:go test\:types test\:coverage sniff lint format shell rift build demo docs\:install docs\:dev docs\:build docs\:lint docs\:format docs\:bun checksums clean
 
 help: ## List the available targets
 	@grep -E '^[a-z\\:-]+:.*## ' $(MAKEFILE_LIST) | awk -F ': ## ' '{gsub(/\\/, "", $$1); printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -106,6 +106,9 @@ docs\:lint: ## Check the docs site with ESLint and Prettier
 
 docs\:format: ## Fix the docs site's formatting with Prettier
 	$(DOCS) bun run format
+
+docs\:bun: ## Run Bun in docs/, e.g. make docs:bun ARGS="update next --latest"
+	$(DOCS) bun $(ARGS)
 
 checksums: ## Re-pin the PHP runtime checksums after changing PHP_VERSION in docker/build.sh
 	$(RUN) bash docker/build.sh --checksums
