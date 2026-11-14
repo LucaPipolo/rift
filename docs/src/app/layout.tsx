@@ -23,10 +23,10 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: {
     template: '%s - Rift',
-    default: 'Rift - Every worktree, side by side',
+    default: 'Rift - Every agent gets its own running app',
   },
   description:
-    'Run every Git worktree of a Docker Compose or Laravel Sail project side by side, each with its own local HTTPS address.',
+    'Run AI agents in parallel, each on its own Git worktree and its own running app, with separate containers, ports and a local HTTPS address. For Docker Compose and Laravel Sail projects.',
 }
 
 export default function RootLayout({
