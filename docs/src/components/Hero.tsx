@@ -116,7 +116,7 @@ export function Hero() {
               copy of your app, with its own containers, ports and HTTPS
               address. Review their work side by side.
             </p>
-            <div className="mt-8 flex gap-4 md:justify-center lg:justify-start">
+            <div className="mt-8 flex flex-wrap gap-4 md:justify-center lg:justify-start">
               <Button href="/docs/quick-start">Get started</Button>
               <Button
                 href="https://github.com/LucaPipolo/rift"
