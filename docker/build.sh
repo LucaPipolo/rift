@@ -76,7 +76,7 @@ trap 'rm -rf "$work"' EXIT
 
 echo "Building rift ${version} with PHP ${PHP_VERSION}"
 
-tar -C "$root" --exclude=./vendor --exclude=./node_modules --exclude=./builds --exclude=./dist --exclude=./.git -cf - . | tar -C "$work" -xf -
+tar -C "$root" --exclude=./vendor --exclude=./node_modules --exclude=./builds --exclude=./dist --exclude=./docs --exclude=./.git -cf - . | tar -C "$work" -xf -
 
 (
     cd "$work"
